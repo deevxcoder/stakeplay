@@ -47,17 +47,10 @@ export interface IStorage {
   sessionStore: any; // Using any to avoid type issues with session store
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private bets: Map<number, Bet>;
-  private history: Map<number, GameHistory>;
-  private deposits: Map<number, Deposit>;
-  private withdrawals: Map<number, Withdrawal>;
-  private userIdCounter: number;
-  private betIdCounter: number;
-  private historyIdCounter: number;
-  private depositIdCounter: number;
-  private withdrawalIdCounter: number;
+import { db, users, bets } from './database';
+import { eq } from 'drizzle-orm';
+
+export class PostgresStorage implements IStorage {
   sessionStore: any; // Using any to avoid type issues with session store
 
   constructor() {
@@ -106,31 +99,27 @@ export class MemStorage implements IStorage {
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      balance: 0, 
-      isDemo: false,
-      isAdmin: false,
-      isActive: true,
+    const result = await db.insert(users).values({
+      username: insertUser.username,
+      password: insertUser.password,
       email: insertUser.email || null,
       mobile: insertUser.mobile || null,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.users.set(id, user);
-    return user;
+      balance: 0,
+      isDemo: false, 
+      isAdmin: false,
+      isActive: true
+    }).returning();
+    return result[0];
   }
 
   async updateUserBalance(userId: number, newBalance: number): Promise<User | undefined> {
