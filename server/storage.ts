@@ -50,7 +50,7 @@ export interface IStorage {
 import { db, users, bets } from './database';
 import { eq } from 'drizzle-orm';
 
-export class PostgresStorage implements IStorage {
+export class MemStorage implements IStorage {
   sessionStore: any; // Using any to avoid type issues with session store
 
   constructor() {
