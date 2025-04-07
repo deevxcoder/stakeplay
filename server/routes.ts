@@ -806,11 +806,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ----- Admin User Management Routes -----
 
-  // Get all users
+  // Create new user
+  app.post("/api/admin/users", ensureAdmin, async (req, res) => {
+    try {
+      const { username, email, password, isAdmin } = req.body;
+      const user = await storage.createUser({
+        username,
+        email,
+        password,
+        isAdmin: isAdmin === "true"
+      });
+      
+      const { password: _, ...userWithoutPassword } = user;
+      return res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      return res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  // Get all users  
   app.get("/api/admin/users", ensureAdmin, async (req, res) => {
     try {
-      // This would retrieve all users from the database
-      // In a real implementation, we would add pagination
       const users = [
         {
           id: 1,
