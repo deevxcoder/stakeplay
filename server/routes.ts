@@ -31,6 +31,22 @@ const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
 
 // Middleware to ensure user is an admin
 const ensureAdmin = (req: Request, res: Response, next: Function) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  
+  const user = req.user as User;
+  const isAdmin = user.isAdmin === true || user.isAdmin === "true";
+  
+  if (!isAdmin) {
+    console.log("Admin access denied for user:", user.username);
+    return res.status(403).json({ message: "Admin access denied" });
+  }
+  
+  console.log("Admin access granted for user:", user.username);
+  next();
+};
+const ensureAdmin = (req: Request, res: Response, next: Function) => {
   if (req.isAuthenticated() && (req.user as User).isAdmin) {
     return next();
   }

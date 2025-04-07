@@ -173,15 +173,16 @@ export class MemStorage implements IStorage {
       throw new Error("User not found");
     }
 
-    // Explicitly set isAdmin to true
+    // Explicitly set isAdmin to true as a string to match schema
     const updatedUser = await db
       .update(users)
-      .set({ isAdmin: true })
+      .set({ isAdmin: "true" })
       .where(eq(users.username, username))
       .returning();
 
-    console.log(`Made user ${username} admin:`, updatedUser[0]);
-    return updatedUser[0];
+    const result = updatedUser[0];
+    console.log(`Made user ${username} admin. isAdmin:`, result.isAdmin);
+    return result;
   }
 
   // Market operations
