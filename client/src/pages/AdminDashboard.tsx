@@ -42,7 +42,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+      <div className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold flex items-center">
             <Badge className="h-5 w-5 mr-2 text-primary" />
@@ -136,8 +136,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Mobile Sidebar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <div className="grid grid-cols-5 h-16">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="grid grid-cols-5 h-16 px-2">
           <Button 
             variant={activeTab === "overview" ? "default" : "ghost"} 
             className="flex flex-col items-center justify-center rounded-none h-full"
@@ -186,8 +186,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto pb-16 md:pb-0">
-        <div className="p-8">
+      <div className="flex-1 overflow-auto pb-16 md:pb-0 bg-gray-50 dark:bg-gray-900">
+        <div className="p-8 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold">

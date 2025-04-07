@@ -8,6 +8,7 @@ import {
 import { User } from "@shared/schema";
 import { getQueryFn, apiRequest } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom"; // Added useNavigate hook
 
 type UserWithoutPassword = Omit<User, "password">;
 
@@ -38,7 +39,8 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+  const navigate = useNavigate(); // Initialize useNavigate
+
   const {
     data: user,
     error,
@@ -51,16 +53,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       try {
-        // Login the user
         const res = await apiRequest("POST", "/api/login", credentials);
         const userData = await res.json();
-        
+
         if (userData.error) {
           throw new Error(userData.error);
         }
 
-        // The isAdmin flag comes directly from the login response
-        // No need for separate admin check since server already includes it
         return {
           ...userData,
           isAdmin: Boolean(userData.isAdmin),
@@ -72,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: UserWithoutPassword) => {
       queryClient.setQueryData(["/api/user"], user);
+      navigate(user.isAdmin ? "/admin" : "/"); // Redirect based on isAdmin
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.username}!`,
@@ -126,8 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
-  
-  // Function to login as demo user
+
   const demoLoginMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/login/demo");
@@ -148,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
-  
+
   const loginAsDemo = () => {
     demoLoginMutation.mutate();
   };
