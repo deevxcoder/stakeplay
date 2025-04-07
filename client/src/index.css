@@ -9,5 +9,90 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    background-image: radial-gradient(
+      rgba(0, 0, 0, 0.7) 1px,
+      transparent 1px
+    );
+    background-size: 40px 40px;
+    background-color: hsl(222, 47%, 11%);
+  }
+}
+
+@layer components {
+  .bg-surface {
+    @apply bg-black/40 backdrop-blur-md;
+  }
+
+  .bg-surface-light {
+    @apply bg-black/60 backdrop-blur-sm;
+  }
+
+  .text-accent {
+    @apply text-amber-400;
+  }
+
+  .bg-accent {
+    @apply bg-amber-400;
+  }
+
+  .text-secondary {
+    @apply text-emerald-400;
+  }
+
+  .bg-secondary {
+    @apply bg-emerald-400;
+  }
+
+  .text-destructive {
+    @apply text-rose-500;
+  }
+
+  .bg-destructive {
+    @apply bg-rose-500;
+  }
+
+  .pulse-animation {
+    animation: pulse 2s infinite;
+  }
+
+  .number-ball {
+    transition: all 0.2s ease;
+  }
+
+  .number-ball:hover {
+    transform: scale(1.05);
+  }
+
+  .game-tab {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0%;
+    height: 2px;
+    background: theme('colors.primary.DEFAULT');
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  .game-tab:hover::after {
+    width: 80%;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
   }
 }

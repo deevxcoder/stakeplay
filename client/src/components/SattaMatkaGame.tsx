@@ -28,8 +28,16 @@ const SattaMatkaGame: React.FC = () => {
   const [gameResult, setGameResult] = useState<SattaMatkaResult | null>(null);
   const [remainingTime, setRemainingTime] = useState<number>(180); // 3 minutes in seconds
 
+  // Define game history type
+  interface GameHistoryItem {
+    id: number;
+    gameType: string;
+    result: string;
+    timestamp: string;
+  }
+
   // Query for game history
-  const { data: gameHistory, isLoading: isHistoryLoading } = useQuery({
+  const { data: gameHistory, isLoading: isHistoryLoading } = useQuery<GameHistoryItem[]>({
     queryKey: ['/api/games/matka/history'],
   });
 
@@ -192,7 +200,7 @@ const SattaMatkaGame: React.FC = () => {
                       <Skeleton key={i} className="h-10 w-full" />
                     ))
                   ) : gameHistory && gameHistory.length > 0 ? (
-                    gameHistory.map((history: any, index: number) => {
+                    gameHistory.map((history, index) => {
                       const resultNumbers = history.result.split(',').map(Number);
                       return (
                         <div key={index} className="flex justify-between items-center bg-surface-light/50 rounded p-2 text-sm">

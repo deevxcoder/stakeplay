@@ -27,8 +27,16 @@ const CoinTossGame: React.FC = () => {
   const [showResults, setShowResults] = useState<boolean>(false);
   const [gameResult, setGameResult] = useState<CoinTossResult | null>(null);
 
+  // Define game history type
+  interface GameHistoryItem {
+    id: number;
+    gameType: string;
+    result: string;
+    timestamp: string;
+  }
+
   // Query for game history
-  const { data: gameHistory, isLoading: isHistoryLoading } = useQuery({
+  const { data: gameHistory, isLoading: isHistoryLoading } = useQuery<GameHistoryItem[]>({
     queryKey: ['/api/games/coin/history'],
   });
 
@@ -48,7 +56,7 @@ const CoinTossGame: React.FC = () => {
     let currentHeadsStreak = 0;
     let currentTailsStreak = 0;
     
-    gameHistory.forEach((history: any) => {
+    gameHistory.forEach((history) => {
       if (history.result === "heads") {
         currentHeadsStreak++;
         currentTailsStreak = 0;
@@ -203,7 +211,7 @@ const CoinTossGame: React.FC = () => {
                       <Skeleton key={i} className="h-8 w-8 rounded-full" />
                     ))
                   ) : gameHistory && gameHistory.length > 0 ? (
-                    gameHistory.map((history: any, index: number) => (
+                    gameHistory.map((history, index) => (
                       <div
                         key={index}
                         className={`h-8 w-8 rounded-full ${
