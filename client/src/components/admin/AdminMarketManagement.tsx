@@ -576,19 +576,6 @@ export default function AdminMarketManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="startDate" className="text-right">
-                  Open Date
-                </Label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  value={marketFormData.startDate}
-                  onChange={handleMarketFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="openTime" className="text-right">
                   Open Time
                 </Label>
@@ -602,19 +589,6 @@ export default function AdminMarketManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="endDate" className="text-right">
-                  Close Date
-                </Label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  value={marketFormData.endDate}
-                  onChange={handleMarketFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="closeTime" className="text-right">
                   Close Time
                 </Label>
@@ -623,19 +597,6 @@ export default function AdminMarketManagement() {
                   name="closeTime"
                   type="time"
                   value={marketFormData.closeTime}
-                  onChange={handleMarketFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="resultDate" className="text-right">
-                  Result Date
-                </Label>
-                <Input
-                  id="resultDate"
-                  name="resultDate"
-                  type="date"
-                  value={marketFormData.resultDate || marketFormData.endDate}
                   onChange={handleMarketFormChange}
                   className="col-span-3"
                 />
@@ -716,22 +677,22 @@ export default function AdminMarketManagement() {
                 </Label>
                 <div className="col-span-3 grid grid-cols-2 gap-3">
                   {[
-                    { id: "jodi", name: "Jodi", icon: "🎲" },
-                    { id: "oddEven", name: "Odd/Even", icon: "⚖️" },
-                    { id: "cross", name: "Cross", icon: "✖️" },
-                    { id: "hurf", name: "Hurf", icon: "🎯" }
+                    { id: "jodi", name: "Jodi", icon: "🎲", value: "jodi" },
+                    { id: "oddEven", name: "Odd/Even", icon: "⚖️", value: "oddEven" },
+                    { id: "cross", name: "Cross", icon: "✖️", value: "cross" },
+                    { id: "hurf", name: "Hurf", icon: "🎯", value: "hurf" }
                   ].map((betType) => (
                     <div
                       key={betType.id}
                       className={`border rounded-lg p-3 cursor-pointer transition-all ${
-                        marketFormData.allowedBetTypes.includes(betType.id)
+                        marketFormData.allowedBetTypes.includes(betType.value)
                           ? "bg-primary/10 border-primary"
                           : "bg-background hover:bg-primary/5"
                       }`}
                       onClick={() => {
-                        const newTypes = marketFormData.allowedBetTypes.includes(betType.id)
-                          ? marketFormData.allowedBetTypes.filter(t => t !== betType.id)
-                          : [...marketFormData.allowedBetTypes, betType.id];
+                        const newTypes = marketFormData.allowedBetTypes.includes(betType.value)
+                          ? marketFormData.allowedBetTypes.filter(t => t !== betType.value)
+                          : [...marketFormData.allowedBetTypes, betType.value];
                         setMarketFormData(prev => ({
                           ...prev,
                           allowedBetTypes: newTypes
