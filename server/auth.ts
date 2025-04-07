@@ -59,11 +59,13 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        const user = await storage.getUserByUsername(username);
-        console.log("Login attempt for user:", username);
+        // Convert username to lowercase for case-insensitive comparison
+        const normalizedUsername = username.toLowerCase();
+        const user = await storage.getUserByUsername(normalizedUsername);
+        console.log("Login attempt for user:", normalizedUsername);
         
         if (!user) {
-          console.log("User not found:", username);
+          console.log("User not found:", normalizedUsername);
           return done(null, false, { message: "Incorrect username." });
         }
         
