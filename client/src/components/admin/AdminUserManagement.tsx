@@ -158,25 +158,27 @@ export default function AdminUserManagement() {
     setIsEditDialogOpen(true);
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { //updated type
-    const { name, value, type } = e.target;
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
+    const { name, value } = e.target;
     setEditFormData({
       ...editFormData,
-      [name]: type === "number" ? parseFloat(value) : value,
+      [name]: name === "amount" ? parseFloat(value) : value,
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
-      if(editFormData.transactionType){
+      if(editFormData.transactionType && editFormData.amount > 0){
         const updatedBalance = editFormData.transactionType === 'deposit' ? 
-          editingUser.balance + editFormData.amount : editingUser.balance - editFormData.amount;
+          Number(editingUser.balance || 0) + Number(editFormData.amount) : 
+          Number(editingUser.balance || 0) - Number(editFormData.amount);
 
         editUserMutation.mutate({
           id: editingUser.id,
-          ...editFormData,
           balance: updatedBalance,
+          isActive: editFormData.isActive,
+          isAdmin: editFormData.isAdmin,
         });
       } else {
         editUserMutation.mutate({
@@ -394,8 +396,11 @@ export default function AdminUserManagement() {
                 </Label>
                 <Select
                   name="transactionType"
-                  value={editFormData.transactionType}
-                  onValueChange={handleFormChange}
+                  value={editFormData.transactionType || ""}
+                  onValueChange={(value) => setEditFormData({
+                    ...editFormData,
+                    transactionType: value
+                  })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select transaction type" />
