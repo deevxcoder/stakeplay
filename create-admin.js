@@ -1,3 +1,4 @@
+
 import { storage } from './server/storage.ts';
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
@@ -7,7 +8,7 @@ const scryptAsync = promisify(scrypt);
 async function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
   const buf = await scryptAsync(password, salt, 64);
-  return ;
+  return `${buf.toString("hex")}.${salt}`;
 }
 
 async function createAdminUser() {
@@ -35,8 +36,11 @@ async function createAdminUser() {
     // Verify the user is now an admin
     const verifiedUser = await storage.getUserByUsername('admin');
     console.log('Final admin user status:', verifiedUser);
+    
+    return verifiedUser;
   } catch (error) {
     console.error('Error:', error);
+    throw error;
   }
 }
 
