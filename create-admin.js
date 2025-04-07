@@ -1,5 +1,4 @@
-
-import { storage } from './server/storage.ts';
+const { storage } = require('./server/storage');
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
@@ -13,32 +12,25 @@ async function hashPassword(password) {
 
 async function createAdminUser() {
   try {
-    // First, check if admin already exists
-    let adminUser = await storage.getUserByUsername('admin');
-    console.log('Existing admin user:', adminUser);
-    
-    if (!adminUser) {
-      // Create a new admin user with no initial balance
-      const hashedPassword = await hashPassword('admin123');
-      adminUser = await storage.createUser({
-        username: 'admin',
-        password: hashedPassword,
-        email: 'admin@example.com',
-        mobile: '+1234567890',
-        balance: 0,
-        isAdmin: true
-      });
-      console.log('Created new admin user:', adminUser);
-    } else {
-      // Update existing user to be admin with no balance override
-      adminUser = await storage.makeUserAdmin(adminUser.username);
-      console.log('Updated admin privileges:', adminUser);
-    }
-    
-    // Verify the user is now an admin
+    // Delete existing admin if any
+    await storage.deleteUserByUsername('admin');
+
+    // Create new admin user
+    const adminUser = await storage.createUser({
+      username: 'admin',
+      password: 'admin123',
+      email: 'admin@example.com',
+      mobile: '+1234567890',
+      balance: 0,
+      isAdmin: true
+    });
+
+    console.log('Created new admin user:', adminUser);
+
+    // Verify admin status
     const verifiedUser = await storage.getUserByUsername('admin');
-    console.log('Final admin user status:', verifiedUser);
-    
+    console.log('Verified admin user status:', verifiedUser);
+
     return verifiedUser;
   } catch (error) {
     console.error('Error:', error);
