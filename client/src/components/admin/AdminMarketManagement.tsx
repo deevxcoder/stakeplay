@@ -737,32 +737,7 @@ export default function AdminMarketManagement() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="startDate" className="text-right">
-                  Start Date
-                </Label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  value={marketFormData.startDate}
-                  onChange={handleMarketFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="endDate" className="text-right">
-                  End Date
-                </Label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  value={marketFormData.endDate}
-                  onChange={handleMarketFormChange}
-                  className="col-span-3"
-                />
-              </div>
+              
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="coverImage" className="text-right">
                   Cover Image
