@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useUser } from "@/context/UserContext";
+import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -18,7 +18,7 @@ type CoinTossResult = {
 };
 
 const CoinTossGame: React.FC = () => {
-  const { user, updateBalance } = useUser();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -99,7 +99,8 @@ const CoinTossGame: React.FC = () => {
       setIsFlipping(true);
       setTimeout(() => {
         setGameResult(data);
-        updateBalance(data.newBalance);
+        // Update user data via query invalidation
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
         setIsFlipping(false);
         setShowResults(true);
         queryClient.invalidateQueries({ queryKey: ['/api/games/coin/history'] });
