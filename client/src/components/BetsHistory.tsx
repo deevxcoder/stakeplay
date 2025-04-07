@@ -14,6 +14,8 @@ interface Bet {
   payout: number;
   isWin: boolean;
   createdAt: string;
+  market?: string;
+  betType?: string;
 }
 
 const BetsHistory: React.FC = () => {
@@ -21,17 +23,94 @@ const BetsHistory: React.FC = () => {
     queryKey: ['/api/user/bets'],
   });
 
+  // Format market name for display
+  const formatMarketName = (market?: string): string => {
+    if (!market) return "";
+    switch (market) {
+      case "gali": return "Gali";
+      case "dishawar": return "Dishawar";
+      case "mumbai": return "Mumbai";
+      default: return market.charAt(0).toUpperCase() + market.slice(1);
+    }
+  };
+
+  // Format bet type for display
+  const formatBetType = (betType?: string): string => {
+    if (!betType) return "";
+    switch (betType) {
+      case "jodi": return "Jodi";
+      case "oddEven": return "Odd/Even";
+      case "cross": return "Cross";
+      case "hurf": return "Hurf";
+      default: return betType.charAt(0).toUpperCase() + betType.slice(1);
+    }
+  };
+
   // Format the selection display
-  const formatSelection = (gameType: string, selection: string) => {
+  const formatSelection = (bet: Bet) => {
+    const { gameType, selection, betType } = bet;
+    
     if (gameType === "satta_matka") {
-      return (
-        <div className="flex flex-wrap gap-1">
-          {selection.split(",").map((num, idx) => (
-            <span key={idx} className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs font-medium">{num}</span>
-          ))}
-        </div>
-      );
+      if (betType === "jodi") {
+        return (
+          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-medium">
+            {selection}
+          </span>
+        );
+      } else if (betType === "oddEven") {
+        return (
+          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-medium capitalize">
+            {selection}
+          </span>
+        );
+      } else if (betType === "cross") {
+        return (
+          <div className="flex flex-wrap gap-1">
+            {selection.split(",").map((num, idx) => (
+              <span key={idx} className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs font-medium">{num}</span>
+            ))}
+          </div>
+        );
+      } else if (betType === "hurf") {
+        // Handle Hurf display - usually in format "left:X,right:Y"
+        if (selection.includes("left:") || selection.includes("right:")) {
+          const parts = selection.split(",");
+          return (
+            <div className="flex flex-col gap-1">
+              {parts.map((part, idx) => {
+                const [pos, val] = part.split(":");
+                if (val && val !== "null") {
+                  return (
+                    <span key={idx} className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs font-medium capitalize">
+                      {pos}: {val}
+                    </span>
+                  );
+                }
+                return null;
+              }).filter(Boolean)}
+            </div>
+          );
+        }
+        // Fallback for other formats
+        return (
+          <div className="flex flex-wrap gap-1">
+            {selection.split(",").map((num, idx) => (
+              <span key={idx} className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs font-medium">{num}</span>
+            ))}
+          </div>
+        );
+      } else {
+        // Original legacy format
+        return (
+          <div className="flex flex-wrap gap-1">
+            {selection.split(",").map((num, idx) => (
+              <span key={idx} className="bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs font-medium">{num}</span>
+            ))}
+          </div>
+        );
+      }
     } else {
+      // Coin toss format (unchanged)
       const bgColor = selection === "heads" ? "primary" : "amber";
       return (
         <span className={`bg-${bgColor}/20 text-${bgColor}-400 px-2 py-0.5 rounded-full text-xs font-medium`}>
@@ -75,15 +154,31 @@ const BetsHistory: React.FC = () => {
                 bets.map((bet) => (
                   <tr key={bet.id} className="hover:bg-surface-light/30 transition-colors">
                     <td className="py-4 px-6">
-                      <div className="flex items-center">
-                        {bet.gameType === "satta_matka" ? (
-                          <Dice5 className="text-amber-400 mr-2 h-5 w-5" />
-                        ) : (
-                          <Coins className="text-amber-400 mr-2 h-5 w-5" />
+                      <div className="flex flex-col">
+                        <div className="flex items-center">
+                          {bet.gameType === "satta_matka" ? (
+                            <Dice5 className="text-amber-400 mr-2 h-5 w-5" />
+                          ) : (
+                            <Coins className="text-amber-400 mr-2 h-5 w-5" />
+                          )}
+                          <span className="font-medium">
+                            {bet.gameType === "satta_matka" ? "Satta Matka" : "Coin Toss"}
+                          </span>
+                        </div>
+                        {bet.gameType === "satta_matka" && (bet.market || bet.betType) && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {bet.market && (
+                              <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary/90 rounded-full">
+                                {formatMarketName(bet.market)}
+                              </span>
+                            )}
+                            {bet.betType && (
+                              <span className="text-xs px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded-full">
+                                {formatBetType(bet.betType)}
+                              </span>
+                            )}
+                          </div>
                         )}
-                        <span className="font-medium">
-                          {bet.gameType === "satta_matka" ? "Satta Matka" : "Coin Toss"}
-                        </span>
                       </div>
                     </td>
                     <td className="py-4 px-6 text-sm text-white/70">
@@ -93,7 +188,7 @@ const BetsHistory: React.FC = () => {
                       <span className="text-amber-400">{bet.betAmount}</span>
                     </td>
                     <td className="py-4 px-6">
-                      {formatSelection(bet.gameType, bet.selection)}
+                      {formatSelection(bet)}
                     </td>
                     <td className="py-4 px-6">
                       <span className={`flex items-center ${
