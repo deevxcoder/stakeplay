@@ -1,73 +1,79 @@
 
 import { storage } from "./storage";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
 import { db, users, bets } from "./database";
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
+import { eq } from 'drizzle-orm';
 
 async function seedDatabase() {
   try {
+    // Delete existing data
+    await db.delete(users);
+
     // Create test users
     const testUsers = [
       {
-        username: "test_user",
-        password: await hashPassword("test123"),
-        email: "test@example.com",
+        username: "kalua",
+        password: "kalua123",
+        email: "kalua@example.com",
         mobile: "+1234567890",
-        balance: 5000,
-        isAdmin: false
+        balance: 10000,
+        isAdmin: true,
+        isDemo: false,
+        isActive: true
       },
       {
-        username: "test_admin",
-        password: await hashPassword("admin123"),
-        email: "testadmin@example.com",
+        username: "demo_user",
+        password: "demo123",
+        email: "demo@example.com",
         mobile: "+9876543210",
-        balance: 10000,
-        isAdmin: true
+        balance: 5000,
+        isAdmin: false,
+        isDemo: true,
+        isActive: true
       }
     ];
 
     // Insert test users
     for (const user of testUsers) {
-      const existingUser = await storage.getUserByUsername(user.username);
-      if (!existingUser) {
-        const newUser = await storage.createUser(user);
-        console.log(`Created user: ${newUser.username}, isAdmin: ${newUser.isAdmin}`);
-      }
+      const result = await db.insert(users).values(user).returning();
+      console.log(`Created user: ${result[0].username}, isAdmin: ${result[0].isAdmin}`);
     }
 
-    // Create sample bets
-    const testUser = await storage.getUserByUsername("test_user");
-    if (testUser) {
-      const sampleBets = [
-        {
-          userId: testUser.id,
-          amount: 100,
-          market: "gali",
-          betType: "jodi",
-          status: "completed",
-        },
-        {
-          userId: testUser.id,
-          amount: 200,
-          market: "dishawar",
-          betType: "oddEven",
-          status: "pending",
-        }
-      ];
-
-      // Insert sample bets
-      for (const bet of sampleBets) {
-        await db.insert(bets).values(bet);
-        console.log(`Created bet for user ${testUser.username}`);
+    // Create default markets in storage
+    const defaultMarkets = [
+      {
+        id: "gali",
+        name: "Gali Market",
+        displayName: "Gali",
+        description: "Popular market with daily results",
+        openTime: "10:00",
+        closeTime: "17:00",
+        resultTime: "17:30",
+        color: "#FF5733",
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        coverImage: "/src/assets/gali-banner.svg",
+        allowedBetTypes: ["jodi", "oddEven", "cross", "hurf"]
+      },
+      {
+        id: "dishawar",
+        name: "Dishawar Market",
+        displayName: "Dishawar",
+        description: "Traditional market with evening results",
+        openTime: "15:00",
+        closeTime: "21:00",
+        resultTime: "21:30",
+        color: "#33FF57",
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        coverImage: "/src/assets/dishawar-banner.svg",
+        allowedBetTypes: ["jodi", "oddEven", "cross", "hurf"]
       }
+    ];
+
+    // Create markets
+    for (const market of defaultMarkets) {
+      await storage.createMarket(market);
+      console.log(`Created market: ${market.name}`);
     }
 
     console.log("Database seeding completed successfully");
