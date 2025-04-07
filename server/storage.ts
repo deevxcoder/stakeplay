@@ -66,6 +66,7 @@ export class MemStorage implements IStorage {
     this.history = new Map();
     this.deposits = new Map();
     this.withdrawals = new Map();
+    this.markets = new Map();
     this.userIdCounter = 1;
     this.betIdCounter = 1;
     this.historyIdCounter = 1;

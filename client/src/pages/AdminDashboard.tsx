@@ -199,8 +199,8 @@ export default function AdminDashboard() {
                 {activeTab === "settings" && "Admin Settings"}
               </h1>
               <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
-                <Link href="/">
-                  <a className="hover:text-gray-700 dark:hover:text-gray-300">Home</a>
+                <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-300">
+                  Home
                 </Link>
                 <ChevronRight className="h-4 w-4 mx-1" />
                 <span>Admin</span>
