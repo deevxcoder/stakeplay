@@ -224,7 +224,26 @@ export default function AdminMarketManagement() {
   // Handle market form submit
   const handleMarketFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateMarketMutation.mutate(marketFormData);
+    
+    // Validate required fields
+    if (!marketFormData.displayName || !marketFormData.startDate || !marketFormData.endDate || 
+        !marketFormData.openTime || !marketFormData.closeTime || !marketFormData.resultTime ||
+        marketFormData.allowedBetTypes.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Prepare data in the correct format
+    const formattedData = {
+      ...marketFormData,
+      allowedBetTypes: JSON.stringify(marketFormData.allowedBetTypes)
+    };
+
+    updateMarketMutation.mutate(formattedData);
   };
 
   // Handle result form submit
@@ -527,8 +546,8 @@ export default function AdminMarketManagement() {
       <Dialog open={isEditMarketOpen} onOpenChange={setIsEditMarketOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Edit Market</DialogTitle>
-            <DialogDescription>Update market details and timings</DialogDescription>
+            <DialogTitle>{marketFormData.id ? "Edit Market" : "Create New Market"}</DialogTitle>
+            <DialogDescription>{marketFormData.id ? "Update market details and timings" : "Create a new market with details and timings"}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleMarketFormSubmit}>
             <div className="grid gap-4 py-4">
@@ -557,6 +576,19 @@ export default function AdminMarketManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startDate" className="text-right">
+                  Open Date
+                </Label>
+                <Input
+                  id="startDate"
+                  name="startDate"
+                  type="date"
+                  value={marketFormData.startDate}
+                  onChange={handleMarketFormChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="openTime" className="text-right">
                   Open Time
                 </Label>
@@ -570,6 +602,19 @@ export default function AdminMarketManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="endDate" className="text-right">
+                  Close Date
+                </Label>
+                <Input
+                  id="endDate"
+                  name="endDate"
+                  type="date"
+                  value={marketFormData.endDate}
+                  onChange={handleMarketFormChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="closeTime" className="text-right">
                   Close Time
                 </Label>
@@ -578,6 +623,19 @@ export default function AdminMarketManagement() {
                   name="closeTime"
                   type="time"
                   value={marketFormData.closeTime}
+                  onChange={handleMarketFormChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="resultDate" className="text-right">
+                  Result Date
+                </Label>
+                <Input
+                  id="resultDate"
+                  name="resultDate"
+                  type="date"
+                  value={marketFormData.resultDate || marketFormData.endDate}
                   onChange={handleMarketFormChange}
                   className="col-span-3"
                 />
@@ -652,23 +710,40 @@ export default function AdminMarketManagement() {
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="allowedBetTypes" className="text-right">
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right pt-2">
                   Allowed Bet Types
                 </Label>
-                <div className="col-span-3">
-                  <Select name="allowedBetTypes" value={marketFormData.allowedBetTypes} onChange={handleMarketFormChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select bet types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={["jodi"]}>Jodi</SelectItem>
-                      <SelectItem value={["oddEven"]}>Odd/Even</SelectItem>
-                      <SelectItem value={["cross"]}>Cross</SelectItem>
-                      <SelectItem value={["hurf"]}>Hurf</SelectItem>
-                      <SelectItem value={["jodi", "oddEven", "cross", "hurf"]}>All</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="col-span-3 grid grid-cols-2 gap-3">
+                  {[
+                    { id: "jodi", name: "Jodi", icon: "🎲" },
+                    { id: "oddEven", name: "Odd/Even", icon: "⚖️" },
+                    { id: "cross", name: "Cross", icon: "✖️" },
+                    { id: "hurf", name: "Hurf", icon: "🎯" }
+                  ].map((betType) => (
+                    <div
+                      key={betType.id}
+                      className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                        marketFormData.allowedBetTypes.includes(betType.id)
+                          ? "bg-primary/10 border-primary"
+                          : "bg-background hover:bg-primary/5"
+                      }`}
+                      onClick={() => {
+                        const newTypes = marketFormData.allowedBetTypes.includes(betType.id)
+                          ? marketFormData.allowedBetTypes.filter(t => t !== betType.id)
+                          : [...marketFormData.allowedBetTypes, betType.id];
+                        setMarketFormData(prev => ({
+                          ...prev,
+                          allowedBetTypes: newTypes
+                        }));
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{betType.icon}</span>
+                        <span className="font-medium">{betType.name}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
