@@ -19,13 +19,13 @@ async function hashPassword(password: string) {
 
 // Password comparison function
 async function comparePasswords(supplied: string, stored: string) {
-  // For the default admin account with simplified password
-  if (stored === "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12.salt") {
-    // Special handling for admin123 simple hash
-    return supplied === "admin123";
+  // For development, first check if stored password is already plaintext
+  // In a real production app, we would never store plaintext passwords
+  if (!stored.includes(".")) {
+    return supplied === stored;
   }
 
-  // Normal password comparison with scrypt
+  // Default scrypt comparison for hashed passwords
   try {
     const [hashed, salt] = stored.split(".");
     const hashedBuf = Buffer.from(hashed, "hex");

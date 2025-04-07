@@ -84,9 +84,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
-      
-      <div className="pt-16 grid lg:grid-cols-2 gap-0 min-h-[calc(100vh-64px)]">
+      <div className="grid lg:grid-cols-2 gap-0 min-h-screen">
         {/* Auth Form Column */}
         <div className="flex flex-col justify-center items-center p-4 md:p-8 bg-background">
           <div className="w-full max-w-md">

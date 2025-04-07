@@ -81,15 +81,14 @@ export class MemStorage implements IStorage {
   
   // Create a default admin user for development purposes
   private async createDefaultAdminUser() {
-    // Create admin password hash without using the scrypt function
-    // This is a simplified hash for development, in production use proper hashing
-    const adminPasswordHash = "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12.salt"; // Admin123
-    
+    // Use a simple password for development purposes
+    // In this case, we'll use plaintext "admin123" for easier debugging
+    // In production, this would never be done
     const adminId = this.userIdCounter++;
     const adminUser: User = {
       id: adminId,
       username: "admin",
-      password: adminPasswordHash,
+      password: "admin123",
       email: "admin@example.com",
       mobile: "+1234567890",
       balance: 10000,
