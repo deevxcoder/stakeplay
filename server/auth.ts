@@ -139,9 +139,13 @@ export function setupAuth(app: Express) {
       req.login(user, (err) => {
         if (err) return next(err);
         
-        // Return user data without password
+        // Return user data without password, ensure isAdmin is included
         const { password, ...userWithoutPassword } = user;
-        return res.json(userWithoutPassword);
+        console.log("User logged in:", userWithoutPassword.username, "isAdmin:", userWithoutPassword.isAdmin);
+        return res.json({
+          ...userWithoutPassword,
+          isAdmin: Boolean(userWithoutPassword.isAdmin)
+        });
       });
     })(req, res, next);
   });

@@ -58,14 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userData.error) {
           throw new Error(userData.error);
         }
-        
-        // Check admin status
-        const adminCheck = await apiRequest("GET", "/api/check-admin");
-        const adminStatus = await adminCheck.json();
-        
+
+        // The isAdmin flag comes directly from the login response
+        // No need for separate admin check since server already includes it
         return {
           ...userData,
-          isAdmin: Boolean(adminStatus.isAdmin),
+          isAdmin: Boolean(userData.isAdmin),
           balance: userData.balance || 0
         };
       } catch (error) {
