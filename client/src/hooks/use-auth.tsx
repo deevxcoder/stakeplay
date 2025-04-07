@@ -109,8 +109,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   
   // Function to login as demo user
+  const demoLoginMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/login/demo");
+      return await res.json();
+    },
+    onSuccess: (user: UserWithoutPassword) => {
+      queryClient.setQueryData(["/api/user"], user);
+      toast({
+        title: "Demo mode activated",
+        description: "You're now using a demo account with 10,000 virtual coins!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Demo login failed",
+        description: error.message || "Could not log in as demo user",
+        variant: "destructive",
+      });
+    },
+  });
+  
   const loginAsDemo = () => {
-    loginMutation.mutate({ username: "demo", password: "password" });
+    demoLoginMutation.mutate();
   };
 
   return (

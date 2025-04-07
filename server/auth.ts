@@ -134,6 +134,34 @@ export function setupAuth(app: Express) {
     });
   });
 
+  // Demo login route - creates or finds demo user and logs them in
+  app.post("/api/login/demo", async (req, res, next) => {
+    try {
+      // Check if demo user exists
+      let demoUser = await storage.getUserByUsername("demo");
+      
+      // Create demo user if it doesn't exist
+      if (!demoUser) {
+        const hashedPassword = await hashPassword("demo-password");
+        demoUser = await storage.createUser({
+          username: "demo",
+          password: hashedPassword
+        });
+      }
+      
+      // Log the user in
+      req.login(demoUser, (err) => {
+        if (err) return next(err);
+        
+        // Return user data without password
+        const { password, ...userWithoutPassword } = demoUser;
+        return res.json(userWithoutPassword);
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // Get current user route
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) {

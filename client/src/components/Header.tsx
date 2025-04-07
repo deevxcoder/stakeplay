@@ -87,27 +87,12 @@ const Header: React.FC = () => {
 
           {/* User Avatar - Different states based on login status */}
           {!user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  className="bg-surface-light hover:bg-surface-light/80 p-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-white/10"
-                >
-                  <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleDemoLogin} className="cursor-pointer">
-                  <Coins className="mr-2 h-4 w-4 text-amber-400" />
-                  <span>Login as Demo User</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={goToAuth} className="cursor-pointer">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  <span>Register</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              className="bg-surface-light hover:bg-surface-light/80 p-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-white/10"
+              onClick={goToAuth}
+            >
+              <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </Button>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

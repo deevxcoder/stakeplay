@@ -47,11 +47,7 @@ export class MemStorage implements IStorage {
       checkPeriod: 86400000 // Prune expired sessions every 24 hours
     });
     
-    // Add a default demo user
-    this.createUser({
-      username: "demo",
-      password: "password"
-    });
+    // We'll add a demo user later through the hashPassword API
   }
 
   // User operations
