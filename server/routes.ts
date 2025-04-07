@@ -29,6 +29,14 @@ const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
   res.status(401).json({ message: "Not authenticated" });
 };
 
+// Middleware to ensure user is an admin
+const ensureAdmin = (req: Request, res: Response, next: Function) => {
+  if (req.isAuthenticated() && (req.user as User).isAdmin) {
+    return next();
+  }
+  res.status(403).json({ message: "Unauthorized: Admin access required" });
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
@@ -354,9 +362,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Admin route: Get all pending deposits
-  app.get("/api/admin/deposits/pending", ensureAuthenticated, async (req, res) => {
+  app.get("/api/admin/deposits/pending", ensureAdmin, async (req, res) => {
     try {
-      // TODO: Add admin check here
       const pendingDeposits = await storage.getAllPendingDeposits();
       return res.json(pendingDeposits);
     } catch (error) {
@@ -366,9 +373,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Admin route: Update deposit status
-  app.patch("/api/admin/deposits/:id", ensureAuthenticated, async (req, res) => {
+  app.patch("/api/admin/deposits/:id", ensureAdmin, async (req, res) => {
     try {
-      // TODO: Add admin check here
       const depositId = parseInt(req.params.id);
       const { status, adminNote } = req.body;
       
@@ -460,9 +466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Admin route: Get all pending withdrawals
-  app.get("/api/admin/withdrawals/pending", ensureAuthenticated, async (req, res) => {
+  app.get("/api/admin/withdrawals/pending", ensureAdmin, async (req, res) => {
     try {
-      // TODO: Add admin check here
       const pendingWithdrawals = await storage.getAllPendingWithdrawals();
       return res.json(pendingWithdrawals);
     } catch (error) {
@@ -472,9 +477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Admin route: Update withdrawal status
-  app.patch("/api/admin/withdrawals/:id", ensureAuthenticated, async (req, res) => {
+  app.patch("/api/admin/withdrawals/:id", ensureAdmin, async (req, res) => {
     try {
-      // TODO: Add admin check here
       const withdrawalId = parseInt(req.params.id);
       const { status, adminNote } = req.body;
       
@@ -503,6 +507,299 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(updatedWithdrawal);
     } catch (error) {
       console.error("Error updating withdrawal:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // ----- Admin Market Management Routes -----
+  
+  // Get all markets
+  app.get("/api/admin/markets", ensureAdmin, async (req, res) => {
+    try {
+      // This route would retrieve all markets for admin management
+      // In a real implementation, this would come from the database
+      const markets = [
+        {
+          id: "gali",
+          name: "Gali Market",
+          displayName: "Gali",
+          description: "Popular market with daily results",
+          openTime: "10:00",
+          closeTime: "17:00",
+          resultTime: "17:30",
+          status: "open",
+          color: "#FF5733",
+          latestResult: "42"
+        },
+        {
+          id: "dishawar",
+          name: "Dishawar Market",
+          displayName: "Dishawar",
+          description: "Traditional market with evening results",
+          openTime: "15:00",
+          closeTime: "21:00",
+          resultTime: "21:30",
+          status: "open",
+          color: "#33FF57",
+          latestResult: "87"
+        },
+        {
+          id: "mumbai",
+          name: "Mumbai Market",
+          displayName: "Mumbai",
+          description: "Popular Mumbai-based market",
+          openTime: "09:00",
+          closeTime: "16:00",
+          resultTime: "16:30",
+          status: "open",
+          color: "#3357FF",
+          latestResult: "24"
+        }
+      ];
+      
+      return res.json(markets);
+    } catch (error) {
+      console.error("Error fetching markets:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Update market details
+  app.patch("/api/admin/markets/:id", ensureAdmin, async (req, res) => {
+    try {
+      const marketId = req.params.id;
+      const { openTime, closeTime, resultTime, status } = req.body;
+      
+      // This would update the market in the database
+      // For now, we just return the updated data
+      return res.json({
+        id: marketId,
+        openTime,
+        closeTime,
+        resultTime,
+        status,
+        updated: true
+      });
+    } catch (error) {
+      console.error("Error updating market:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Add market result
+  app.post("/api/admin/markets/:id/results", ensureAdmin, async (req, res) => {
+    try {
+      const marketId = req.params.id;
+      const { result, date } = req.body;
+      
+      if (!result || !date) {
+        return res.status(400).json({ message: "Result and date are required" });
+      }
+      
+      // This would add the result to the database
+      // For now, we just return a success message
+      return res.status(201).json({
+        id: Math.floor(Math.random() * 1000),
+        marketId,
+        result,
+        date,
+        createdAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error adding market result:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get market results history
+  app.get("/api/admin/markets/:id/results", ensureAdmin, async (req, res) => {
+    try {
+      const marketId = req.params.id;
+      
+      // This would retrieve the results from the database
+      // For now, we just return some mock data
+      const results = [
+        {
+          id: 1,
+          marketId,
+          result: "42",
+          date: new Date().toISOString().split('T')[0],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          marketId,
+          result: "87",
+          date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+          createdAt: new Date(Date.now() - 86400000).toISOString()
+        }
+      ];
+      
+      return res.json(results);
+    } catch (error) {
+      console.error("Error fetching market results:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // ----- Admin Settings Routes -----
+  
+  // Get platform settings
+  app.get("/api/admin/settings", ensureAdmin, async (req, res) => {
+    try {
+      // This would retrieve settings from the database
+      // For now, we return some default settings
+      const settings = {
+        maintenance: {
+          enabled: false,
+          message: "We're currently performing maintenance. Please check back soon."
+        },
+        notifications: {
+          emailOnRegistration: true,
+          emailOnDeposit: true,
+          emailOnWithdrawal: true
+        },
+        game: {
+          minBetAmount: 10,
+          maxBetAmount: 10000,
+          coinTossMultiplier: 1.9,
+          sattaMatkaMultiplier: 7.5
+        },
+        platform: {
+          siteName: "Satta Matka",
+          supportEmail: "support@example.com",
+          supportPhone: "+1234567890",
+          demoMode: false
+        }
+      };
+      
+      return res.json(settings);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Update platform settings
+  app.patch("/api/admin/settings", ensureAdmin, async (req, res) => {
+    try {
+      const updatedSettings = req.body;
+      
+      // This would update settings in the database
+      // For now, we just return the updated settings
+      return res.json({
+        ...updatedSettings,
+        updated: true
+      });
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // ----- Admin Dashboard Overview Routes -----
+  
+  // Get admin dashboard stats
+  app.get("/api/admin/stats", ensureAdmin, async (req, res) => {
+    try {
+      // This would calculate stats from the database
+      // For now, we return some mock stats
+      const stats = {
+        totalUsers: 125,
+        newUsersToday: 12,
+        totalDeposits: 58950,
+        pendingDeposits: 7,
+        totalWithdrawals: 25680,
+        pendingWithdrawals: 5,
+        platformProfit: 33270,
+        profitToday: 4250,
+        userGrowth: [
+          { date: '2025-04-01', count: 5 },
+          { date: '2025-04-02', count: 7 },
+          { date: '2025-04-03', count: 3 },
+          { date: '2025-04-04', count: 8 },
+          { date: '2025-04-05', count: 10 },
+          { date: '2025-04-06', count: 9 },
+          { date: '2025-04-07', count: 12 }
+        ],
+        transactionVolume: [
+          { date: '2025-04-01', deposits: 5200, withdrawals: 2100 },
+          { date: '2025-04-02', deposits: 6500, withdrawals: 3200 },
+          { date: '2025-04-03', deposits: 4800, withdrawals: 2500 },
+          { date: '2025-04-04', deposits: 7200, withdrawals: 3800 },
+          { date: '2025-04-05', deposits: 9500, withdrawals: 4200 },
+          { date: '2025-04-06', deposits: 8700, withdrawals: 5100 },
+          { date: '2025-04-07', deposits: 10500, withdrawals: 4800 }
+        ]
+      };
+      
+      return res.json(stats);
+    } catch (error) {
+      console.error("Error calculating admin stats:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // ----- Admin User Management Routes -----
+  
+  // Get all users
+  app.get("/api/admin/users", ensureAdmin, async (req, res) => {
+    try {
+      // This would retrieve all users from the database
+      // In a real implementation, we would add pagination
+      const users = [
+        {
+          id: 1,
+          username: "user1",
+          email: "user1@example.com",
+          mobile: "+1234567890",
+          balance: 5000,
+          isAdmin: false,
+          createdAt: new Date(Date.now() - 7 * 86400000).toISOString()
+        },
+        {
+          id: 2,
+          username: "user2",
+          email: "user2@example.com",
+          mobile: "+1987654321",
+          balance: 2500,
+          isAdmin: false,
+          createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
+        },
+        {
+          id: 3,
+          username: "admin",
+          email: "admin@example.com",
+          mobile: "+1555555555",
+          balance: 10000,
+          isAdmin: true,
+          createdAt: new Date(Date.now() - 30 * 86400000).toISOString()
+        }
+      ];
+      
+      return res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Update user details
+  app.patch("/api/admin/users/:id", ensureAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { balance, isAdmin } = req.body;
+      
+      // This would update the user in the database
+      // For now, we just return a success message
+      return res.json({
+        id: userId,
+        balance,
+        isAdmin,
+        updated: true
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });

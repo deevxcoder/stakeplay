@@ -10,7 +10,11 @@ export const users = pgTable("users", {
   email: text("email"),
   mobile: text("mobile"),
   balance: integer("balance").notNull().default(0),
-  isDemo: boolean("is_demo").default(false),
+  isDemo: boolean("is_demo").notNull().default(false),
+  isAdmin: boolean("is_admin").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -215,3 +219,66 @@ export const paymentDetailsSchema = z.union([
   bankDetailsSchema,
   cashDetailsSchema,
 ]);
+
+// Market table
+export const markets = pgTable("markets", {
+  id: text("id").primaryKey(), // "gali", "dishawar", "mumbai"
+  name: text("name").notNull(),
+  displayName: text("display_name").notNull(),
+  description: text("description").notNull(),
+  openTime: text("open_time").notNull(), // "HH:MM" format
+  closeTime: text("close_time").notNull(), // "HH:MM" format
+  resultTime: text("result_time").notNull(), // "HH:MM" format
+  color: text("color").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMarketSchema = createInsertSchema(markets).pick({
+  id: true,
+  name: true,
+  displayName: true,
+  description: true,
+  openTime: true,
+  closeTime: true,
+  resultTime: true,
+  color: true,
+});
+
+export type InsertMarket = z.infer<typeof insertMarketSchema>;
+export type Market = typeof markets.$inferSelect;
+
+// Market Results table
+export const marketResults = pgTable("market_results", {
+  id: serial("id").primaryKey(),
+  marketId: text("market_id").notNull().references(() => markets.id),
+  result: text("result").notNull(), // two-digit number (00-99)
+  date: text("date").notNull(), // YYYY-MM-DD format
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMarketResultSchema = createInsertSchema(marketResults).pick({
+  marketId: true,
+  result: true,
+  date: true,
+});
+
+export type InsertMarketResult = z.infer<typeof insertMarketResultSchema>;
+export type MarketResult = typeof marketResults.$inferSelect;
+
+// Settings table
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: json("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSettingSchema = createInsertSchema(settings).pick({
+  key: true,
+  value: true,
+});
+
+export type InsertSetting = z.infer<typeof insertSettingSchema>;
+export type Setting = typeof settings.$inferSelect;

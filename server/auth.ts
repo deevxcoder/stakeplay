@@ -160,7 +160,17 @@ export function setupAuth(app: Express) {
         
         // Update demo user's balance to 10000 and mark as demo
         demoUser = await storage.updateUserBalance(demoUser.id, 10000) as User;
-        demoUser.isDemo = true;
+        
+        // Mark as demo and ensure it's not admin
+        const updatedUser = { 
+          ...demoUser, 
+          isDemo: true,
+          isAdmin: false 
+        };
+        
+        // Update user in storage
+        storage.users.set(demoUser.id, updatedUser);
+        demoUser = updatedUser;
       }
       
       // Log the user in
