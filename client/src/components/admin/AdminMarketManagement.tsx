@@ -53,7 +53,7 @@ import {
 } from "lucide-react";
 import { format, parse, addMonths } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar as DateCalendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
