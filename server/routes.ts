@@ -46,7 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   // Set up authentication
   setupAuth(app);
-  
+
   // Special route to make a user an admin (for development purposes only)
   app.post("/api/make-admin", async (req, res) => {
     try {
@@ -54,26 +54,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.headers.accept && req.headers.accept.includes('text/html')) {
         return res.status(200).json({ error: "This API endpoint can only be accessed programmatically" });
       }
-      
+
       const { username } = req.body;
-      
+
       if (!username) {
         return res.status(400).json({ error: "Username is required" });
       }
-      
+
       // For testing, let's log and hardcode a successful response
       console.log(`Attempting to make user '${username}' an admin`);
-      
+
       const user = await storage.makeUserAdmin(username);
-      
+
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
+
       if (!user.isAdmin) {
         return res.status(400).json({ error: "Could not make user an admin. Demo users cannot be admins." });
       }
-      
+
       const responseData = { 
         message: "User is now an admin", 
         user: {
@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           balance: user.balance
         }
       };
-      
+
       console.log('Successful admin creation response:', responseData);
       return res.status(200).json(responseData);
     } catch (error) {
@@ -91,7 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Failed to make user an admin" });
     }
   });
-  
+
   // Check admin status
   app.get("/api/check-admin", ensureAuthenticated, (req, res) => {
     const isAdmin = (req.user as User).isAdmin === true;
@@ -99,14 +99,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Content-Type', 'application/json');
     return res.status(200).send(JSON.stringify({ isAdmin }));
   });
-  
+
   // Another admin check with just text response
   app.get("/api/admin-check-text", ensureAuthenticated, (req, res) => {
     const isAdmin = (req.user as User).isAdmin === true;
     res.setHeader('Content-Type', 'text/plain');
     return res.status(200).send(isAdmin ? "true" : "false");
   });
-  
+
   // Get user's recent bets
   app.get("/api/user/bets", ensureAuthenticated, async (req, res) => {
     const user = req.user as User;
@@ -120,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try the new schema first, fall back to legacy schema if that fails
       let betData;
       let isLegacy = false;
-      
+
       try {
         betData = sattaMatkaSchema.parse(req.body);
       } catch (err) {
@@ -128,31 +128,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         betData = legacySattaMatkaSchema.parse(req.body);
         isLegacy = true;
       }
-      
+
       // Get authenticated user
       const user = req.user as User;
-      
+
       // Check if user has enough balance
       if (user.balance < betData.betAmount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
-      
+
       let result: string;
       let isWin = false;
       let multiplier = 0;
       let stringSelection = '';
       let market = 'gali';
       let betType = 'jodi';
-      
+
       // Handle different game versions
       if (isLegacy) {
         // Legacy game with 3 numbers
         const { selectedNumbers, betAmount } = betData as { selectedNumbers: number[], betAmount: number };
-        
+
         // Generate random result (3 numbers between 0-9)
         const resultArray = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
         result = resultArray.join(",");
-        
+
         // Check if user won
         isWin = JSON.stringify(selectedNumbers.sort()) === JSON.stringify(resultArray.sort());
         multiplier = SATTA_MATKA_MULTIPLIER;
@@ -161,14 +161,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // New Satta Matka with 2-digit results
         // We need type assertions because TypeScript can't properly infer union types
         const data = betData as any;
-        
+
         betType = data.betType as string;
         market = data.market as string;
-        
+
         // Generate two-digit result (00-99)
         const twoDigitResult = Math.floor(Math.random() * 100).toString().padStart(2, '0');
         result = twoDigitResult;
-        
+
         // Determine win and multiplier based on bet type
         switch (betType) {
           case "jodi":
@@ -177,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             isWin = data.selection === twoDigitResult;
             multiplier = MULTIPLIERS.SATTA_MATKA_JODI;
             break;
-            
+
           case "oddEven":
             // Odd or even result
             stringSelection = data.selection as string;
@@ -187,12 +187,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     (data.selection === "even" && !isResultOdd);
             multiplier = MULTIPLIERS.SATTA_MATKA_ODD_EVEN;
             break;
-            
+
           case "cross":
             // Cross combinations
             const crossNumbers = data.selection as number[];
             stringSelection = crossNumbers.join(",");
-            
+
             // Generate all possible combinations
             const combinations: string[] = [];
             for (let i = 0; i < crossNumbers.length; i++) {
@@ -202,29 +202,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
             }
-            
+
             // Check if result matches any combination
             isWin = combinations.includes(twoDigitResult);
-            
+
             // Adjust multiplier based on number of combinations
             multiplier = Math.max(90 / combinations.length, 1.5);
             break;
-            
+
           case "hurf":
             // Left and/or right digit matches
             const leftDigit = data.leftDigit as number | null;
             const rightDigit = data.rightDigit as number | null;
             stringSelection = `left:${leftDigit},right:${rightDigit}`;
-            
+
             const resultLeftDigit = parseInt(twoDigitResult[0]);
             const resultRightDigit = parseInt(twoDigitResult[1]);
-            
+
             const leftMatch = leftDigit !== null && leftDigit === resultLeftDigit;
             const rightMatch = rightDigit !== null && rightDigit === resultRightDigit;
-            
+
             // Win if either position matches
             isWin = leftMatch || rightMatch;
-            
+
             // Multiplier depends on whether one or both positions were selected
             if (leftDigit !== null && rightDigit !== null) {
               multiplier = MULTIPLIERS.SATTA_MATKA_HURF_DOUBLE;
@@ -232,20 +232,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               multiplier = MULTIPLIERS.SATTA_MATKA_HURF_SINGLE;
             }
             break;
-          
+
           default:
             throw new Error(`Unknown bet type: ${betType}`);
         }
       }
-      
+
       // Calculate payout
       const betAmount = (betData as any).betAmount as number;
       const payout = isWin ? Math.floor(betAmount * multiplier) : -betAmount;
-      
+
       // Update user balance
       const newBalance = user.balance + payout;
       await storage.updateUserBalance(user.id, newBalance);
-      
+
       // Record the bet
       const bet = await storage.createBet({
         userId: user.id,
@@ -258,14 +258,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         market,
         betType
       });
-      
+
       // Add to game history
       await storage.addGameHistory({
         gameType: "satta_matka",
         result,
         market
       });
-      
+
       // Return the result
       return res.json({
         result,
@@ -281,13 +281,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Get Satta Matka history (allow filtering by market)
   app.get("/api/games/matka/history", ensureAuthenticated, async (req, res) => {
     try {
       const market = req.query.market as string;
       let history;
-      
+
       if (market) {
         // Filter by market if provided
         history = await storage.getGameHistory("satta_matka", 10);
@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Otherwise get all history
         history = await storage.getGameHistory("satta_matka", 10);
       }
-      
+
       return res.json(history);
     } catch (error) {
       console.error("Error fetching Satta Matka history:", error);
@@ -309,28 +309,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = coinTossSchema.parse(req.body);
       const { choice, betAmount } = validatedData;
-      
+
       // Get authenticated user
       const user = req.user as User;
-      
+
       // Check if user has enough balance
       if (user.balance < betAmount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
-      
+
       // Generate random result
       const result = Math.random() < 0.5 ? "heads" : "tails";
-      
+
       // Check if user won
       const isWin = choice === result;
-      
+
       // Calculate payout
       const payout = isWin ? Math.floor(betAmount * COIN_TOSS_MULTIPLIER) : -betAmount;
-      
+
       // Update user balance
       const newBalance = user.balance + payout;
       await storage.updateUserBalance(user.id, newBalance);
-      
+
       // Record the bet
       const bet = await storage.createBet({
         userId: user.id,
@@ -341,13 +341,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payout,
         isWin
       });
-      
+
       // Add to game history
       await storage.addGameHistory({
         gameType: "coin_toss",
         result
       });
-      
+
       // Return the result
       return res.json({
         result,
@@ -362,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Get Coin Toss history
   app.get("/api/games/coin/history", ensureAuthenticated, async (req, res) => {
     try {
@@ -375,18 +375,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ----- Deposit Routes -----
-  
+
   // Create a new deposit request
   app.post("/api/deposits", ensureAuthenticated, async (req, res) => {
     try {
       const user = req.user as User;
-      
+
       // Validate the request body
       const depositData = insertDepositSchema.parse({
         ...req.body,
         userId: user.id
       });
-      
+
       // Validate payment details based on payment mode
       try {
         paymentDetailsSchema.parse(depositData.details);
@@ -398,10 +398,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       // Create the deposit request
       const deposit = await storage.createDeposit(depositData);
-      
+
       return res.status(201).json(deposit);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -414,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Get user's deposit history
   app.get("/api/deposits", ensureAuthenticated, async (req, res) => {
     try {
@@ -426,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Admin route: Get all pending deposits
   app.get("/api/admin/deposits/pending", ensureAdmin, async (req, res) => {
     try {
@@ -437,27 +437,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Admin route: Update deposit status
   app.patch("/api/admin/deposits/:id", ensureAdmin, async (req, res) => {
     try {
       const depositId = parseInt(req.params.id);
       const { status, adminNote } = req.body;
-      
+
       if (!["approved", "rejected"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
-      
+
       const updatedDeposit = await storage.updateDepositStatus(
         depositId, 
         status, 
         adminNote
       );
-      
+
       if (!updatedDeposit) {
         return res.status(404).json({ message: "Deposit not found" });
       }
-      
+
       // Send email notification about deposit status update
       const user = await storage.getUser(updatedDeposit.userId);
       if (user && user.email) {
@@ -465,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Failed to send deposit status email:", error);
         });
       }
-      
+
       return res.json(updatedDeposit);
     } catch (error) {
       console.error("Error updating deposit:", error);
@@ -474,23 +474,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ----- Withdrawal Routes -----
-  
+
   // Create a new withdrawal request
   app.post("/api/withdrawals", ensureAuthenticated, async (req, res) => {
     try {
       const user = req.user as User;
-      
+
       // Validate the request body
       const withdrawalData = insertWithdrawalSchema.parse({
         ...req.body,
         userId: user.id
       });
-      
+
       // Check if user has enough balance
       if (user.balance < withdrawalData.amount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
-      
+
       // Validate payment details based on payment mode
       try {
         paymentDetailsSchema.parse(withdrawalData.details);
@@ -502,10 +502,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       // Create the withdrawal request (this will also deduct the amount from user's balance)
       const withdrawal = await storage.createWithdrawal(withdrawalData);
-      
+
       return res.status(201).json(withdrawal);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -518,7 +518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Get user's withdrawal history
   app.get("/api/withdrawals", ensureAuthenticated, async (req, res) => {
     try {
@@ -530,7 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Admin route: Get all pending withdrawals
   app.get("/api/admin/withdrawals/pending", ensureAdmin, async (req, res) => {
     try {
@@ -541,27 +541,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Admin route: Update withdrawal status
   app.patch("/api/admin/withdrawals/:id", ensureAdmin, async (req, res) => {
     try {
       const withdrawalId = parseInt(req.params.id);
       const { status, adminNote } = req.body;
-      
+
       if (!["approved", "rejected"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
-      
+
       const updatedWithdrawal = await storage.updateWithdrawalStatus(
         withdrawalId, 
         status, 
         adminNote
       );
-      
+
       if (!updatedWithdrawal) {
         return res.status(404).json({ message: "Withdrawal not found" });
       }
-      
+
       // Send email notification about withdrawal status update
       const user = await storage.getUser(updatedWithdrawal.userId);
       if (user && user.email) {
@@ -569,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Failed to send withdrawal status email:", error);
         });
       }
-      
+
       return res.json(updatedWithdrawal);
     } catch (error) {
       console.error("Error updating withdrawal:", error);
@@ -578,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ----- Admin Market Management Routes -----
-  
+
   // Get all markets
   app.get("/api/admin/markets", ensureAdmin, async (req, res) => {
     try {
@@ -622,20 +622,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           latestResult: "24"
         }
       ];
-      
+
       return res.json(markets);
     } catch (error) {
       console.error("Error fetching markets:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Update market details
   app.patch("/api/admin/markets/:id", ensureAdmin, async (req, res) => {
     try {
       const marketId = req.params.id;
       const { openTime, closeTime, resultTime, status } = req.body;
-      
+
       // This would update the market in the database
       // For now, we just return the updated data
       return res.json({
@@ -651,17 +651,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Add market result
   app.post("/api/admin/markets/:id/results", ensureAdmin, async (req, res) => {
     try {
       const marketId = req.params.id;
       const { result, date } = req.body;
-      
+
       if (!result || !date) {
         return res.status(400).json({ message: "Result and date are required" });
       }
-      
+
       // This would add the result to the database
       // For now, we just return a success message
       return res.status(201).json({
@@ -676,12 +676,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Get market results history
   app.get("/api/admin/markets/:id/results", ensureAdmin, async (req, res) => {
     try {
       const marketId = req.params.id;
-      
+
       // This would retrieve the results from the database
       // For now, we just return some mock data
       const results = [
@@ -700,16 +700,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: new Date(Date.now() - 86400000).toISOString()
         }
       ];
-      
+
       return res.json(results);
     } catch (error) {
       console.error("Error fetching market results:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // ----- Admin Settings Routes -----
-  
+
   // Get platform settings
   app.get("/api/admin/settings", ensureAdmin, async (req, res) => {
     try {
@@ -738,19 +738,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           demoMode: false
         }
       };
-      
+
       return res.json(settings);
     } catch (error) {
       console.error("Error fetching settings:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Update platform settings
   app.patch("/api/admin/settings", ensureAdmin, async (req, res) => {
     try {
       const updatedSettings = req.body;
-      
+
       // This would update settings in the database
       // For now, we just return the updated settings
       return res.json({
@@ -762,9 +762,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // ----- Admin Dashboard Overview Routes -----
-  
+
   // Get admin dashboard stats
   app.get("/api/admin/stats", ensureAdmin, async (req, res) => {
     try {
@@ -798,16 +798,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           { date: '2025-04-07', deposits: 10500, withdrawals: 4800 }
         ]
       };
-      
+
       return res.json(stats);
     } catch (error) {
       console.error("Error calculating admin stats:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // ----- Admin User Management Routes -----
-  
+
   // Get all users
   app.get("/api/admin/users", ensureAdmin, async (req, res) => {
     try {
@@ -842,20 +842,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: new Date(Date.now() - 30 * 86400000).toISOString()
         }
       ];
-      
+
       return res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Update user details
   app.patch("/api/admin/users/:id", ensureAdmin, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const { balance, isAdmin } = req.body;
-      
+
       // This would update the user in the database
       // For now, we just return a success message
       return res.json({
@@ -869,6 +869,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Create a new market
+  app.post("/api/admin/markets", ensureAdmin, async (req, res) => {
+    try {
+      console.log("Database URL:", process.env.DATABASE_URL);
+      const marketData = req.body;
+
+      // Save market to database using storage
+      const newMarket = await storage.createMarket(marketData);
+
+      return res.status(201).json(newMarket);
+    } catch (error) {
+      console.error("Error creating market:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
 
   // Create HTTP server
   const httpServer = createServer(app);
