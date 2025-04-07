@@ -740,12 +740,14 @@ export default function AdminMarketManagement() {
               
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="coverImage" className="text-right">
-                  Cover Image
+                  Cover Image URL
                 </Label>
                 <Input
                   id="coverImage"
                   name="coverImage"
-                  type="file"
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  value={marketFormData.coverImage}
                   onChange={handleMarketFormChange}
                   className="col-span-3"
                 />
