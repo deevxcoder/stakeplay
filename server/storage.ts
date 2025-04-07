@@ -193,6 +193,21 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
+  // Market operations
+  private markets: Map<string, Market>;
+  
+  async createMarket(marketData: InsertMarket): Promise<Market> {
+    const now = new Date();
+    const market: Market = {
+      ...marketData,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.markets.set(market.id, market);
+    return market;
+  }
+
   // Bet operations
   async createBet(insertBet: InsertBet): Promise<Bet> {
     const id = this.betIdCounter++;
