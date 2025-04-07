@@ -30,7 +30,8 @@ export function AdminProtectedRoute({ path, component: Component }: AdminProtect
   }
 
   // If user is available, just check the isAdmin flag
-  if (!user.isAdmin) {
+  const isAdmin = Boolean(user.isAdmin === true || user.isAdmin === "true");
+  if (!isAdmin) {
     console.log("AdminProtectedRoute - Not admin, redirecting to /");
     return (
       <Route path={path}>

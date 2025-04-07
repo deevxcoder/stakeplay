@@ -165,17 +165,23 @@ export class MemStorage implements IStorage {
   }
 
   async makeUserAdmin(username: string): Promise<User | undefined> {
-    const user = await this.getUserByUsername(username);
-    if (!user) return undefined;
+    const user = await db.query.users.findFirst({
+      where: eq(users.username, username)
+    });
 
-    if (user.isDemo) {
-      // Demo users can never be admin
-      return user;
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    const updatedUser = { ...user, isAdmin: true };
-    this.users.set(user.id, updatedUser);
-    return updatedUser;
+    // Explicitly set isAdmin to true
+    const updatedUser = await db
+      .update(users)
+      .set({ isAdmin: true })
+      .where(eq(users.username, username))
+      .returning();
+
+    console.log(`Made user ${username} admin:`, updatedUser[0]);
+    return updatedUser[0];
   }
 
   // Market operations

@@ -71,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: UserWithoutPassword) => {
       queryClient.setQueryData(["/api/user"], user);
-      // Ensure isAdmin is treated as boolean
-      const isAdmin = Boolean(user.isAdmin);
+      // Ensure isAdmin is properly checked as boolean
+      const isAdmin = Boolean(user.isAdmin === true || user.isAdmin === "true");
       navigate(isAdmin ? "/admin" : "/");
       toast({
         title: "Login successful",
