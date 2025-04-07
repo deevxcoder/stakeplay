@@ -30,15 +30,15 @@ export default function AdminDashboard() {
   const { user, logoutMutation } = useAuth();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   // Admin check is now handled by AdminProtectedRoute component
-  
+
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       logoutMutation.mutate();
     }
   };
-  
+
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
             <span>Admin Panel</span>
           </h2>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto py-4">
           <Tabs defaultValue="overview" className="w-full" value={activeTab}>
             <nav className="px-2 space-y-1">
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
                 <LayoutDashboard className="h-5 w-5 mr-3" />
                 Dashboard
               </TabsTrigger>
-              
+
               <TabsTrigger 
                 value="users" 
                 className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
                 <Users className="h-5 w-5 mr-3" />
                 User Management
               </TabsTrigger>
-              
+
               <TabsTrigger 
                 value="deposits" 
                 className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
                 <DollarSign className="h-5 w-5 mr-3" />
                 Deposits
               </TabsTrigger>
-              
+
               <TabsTrigger 
                 value="withdrawals" 
                 className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
                 <CreditCard className="h-5 w-5 mr-3" />
                 Withdrawals
               </TabsTrigger>
-              
+
               <TabsTrigger 
                 value="markets" 
                 className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
                 <Calendar className="h-5 w-5 mr-3" />
                 Market Management
               </TabsTrigger>
-              
+
               <TabsTrigger 
                 value="settings" 
                 className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
@@ -107,10 +107,11 @@ export default function AdminDashboard() {
                 <Settings className="h-5 w-5 mr-3" />
                 Settings
               </TabsTrigger>
-            </TabsList>
-          </nav>
+              </TabsList>
+            </nav>
+          </Tabs>
         </div>
-        
+
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -133,7 +134,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Sidebar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-5 h-16">
@@ -145,7 +146,7 @@ export default function AdminDashboard() {
             <LayoutDashboard className="h-5 w-5" />
             <span className="text-xs mt-1">Dashboard</span>
           </Button>
-          
+
           <Button 
             variant={activeTab === "users" ? "default" : "ghost"} 
             className="flex flex-col items-center justify-center rounded-none h-full"
@@ -154,7 +155,7 @@ export default function AdminDashboard() {
             <Users className="h-5 w-5" />
             <span className="text-xs mt-1">Users</span>
           </Button>
-          
+
           <Button 
             variant={activeTab === "deposits" ? "default" : "ghost"} 
             className="flex flex-col items-center justify-center rounded-none h-full"
@@ -163,7 +164,7 @@ export default function AdminDashboard() {
             <DollarSign className="h-5 w-5" />
             <span className="text-xs mt-1">Deposits</span>
           </Button>
-          
+
           <Button 
             variant={activeTab === "withdrawals" ? "default" : "ghost"} 
             className="flex flex-col items-center justify-center rounded-none h-full"
@@ -172,7 +173,7 @@ export default function AdminDashboard() {
             <CreditCard className="h-5 w-5" />
             <span className="text-xs mt-1">Withdraw</span>
           </Button>
-          
+
           <Button 
             variant={activeTab === "markets" ? "default" : "ghost"} 
             className="flex flex-col items-center justify-center rounded-none h-full"
@@ -183,7 +184,7 @@ export default function AdminDashboard() {
           </Button>
         </div>
       </div>
-      
+
       {/* Main Content */}
       <div className="flex-1 overflow-auto pb-16 md:pb-0">
         <div className="p-8">
@@ -214,7 +215,7 @@ export default function AdminDashboard() {
                 </span>
               </div>
             </div>
-            
+
             <div className="hidden md:block">
               <Button 
                 variant="outline" 
@@ -231,29 +232,29 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </div>
-          
+
           <div className="mt-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsContent value="overview" className="mt-0">
                 <AdminOverview />
               </TabsContent>
-              
+
               <TabsContent value="users" className="mt-0">
                 <AdminUserManagement />
               </TabsContent>
-              
+
               <TabsContent value="deposits" className="mt-0">
                 <AdminDeposits />
               </TabsContent>
-              
+
               <TabsContent value="withdrawals" className="mt-0">
                 <AdminWithdrawals />
               </TabsContent>
-              
+
               <TabsContent value="markets" className="mt-0">
                 <AdminMarketManagement />
               </TabsContent>
-              
+
               <TabsContent value="settings" className="mt-0">
                 <AdminSettings />
               </TabsContent>
