@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -7,12 +7,17 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  balance: integer("balance").notNull().default(10000),
+  email: text("email"),
+  mobile: text("mobile"),
+  balance: integer("balance").notNull().default(0),
+  isDemo: boolean("is_demo").default(false),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  email: true,
+  mobile: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -136,3 +141,77 @@ export const MULTIPLIERS = {
 // Legacy multipliers (for backward compatibility)
 export const SATTA_MATKA_MULTIPLIER = 7.5;
 export const COIN_TOSS_MULTIPLIER = 1.9;
+
+// Deposit table
+export const deposits = pgTable("deposits", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  amount: integer("amount").notNull(),
+  paymentMode: text("payment_mode").notNull(), // "upi", "bank", "cash"
+  status: text("status").notNull().default("pending"), // "pending", "approved", "rejected"
+  details: json("details"), // Different details based on payment mode
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  adminNote: text("admin_note"), // Note from admin during verification
+});
+
+export const insertDepositSchema = createInsertSchema(deposits).pick({
+  userId: true,
+  amount: true,
+  paymentMode: true,
+  details: true,
+});
+
+export type InsertDeposit = z.infer<typeof insertDepositSchema>;
+export type Deposit = typeof deposits.$inferSelect;
+
+// Withdrawal table
+export const withdrawals = pgTable("withdrawals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  amount: integer("amount").notNull(),
+  paymentMode: text("payment_mode").notNull(), // "upi", "bank", "cash"
+  status: text("status").notNull().default("pending"), // "pending", "approved", "rejected"
+  details: json("details"), // Different details based on payment mode
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  adminNote: text("admin_note"), // Note from admin during verification
+});
+
+export const insertWithdrawalSchema = createInsertSchema(withdrawals).pick({
+  userId: true,
+  amount: true,
+  paymentMode: true,
+  details: true,
+});
+
+export type InsertWithdrawal = z.infer<typeof insertWithdrawalSchema>;
+export type Withdrawal = typeof withdrawals.$inferSelect;
+
+// Payment mode details validation schemas
+export const upiDetailsSchema = z.object({
+  upiId: z.string().min(3),
+  utrNumber: z.string().optional(),
+  screenshot: z.string().optional(),
+});
+
+export const bankDetailsSchema = z.object({
+  accountNumber: z.string().min(5),
+  ifscCode: z.string().min(8),
+  accountHolderName: z.string().min(2),
+  bankName: z.string().min(2),
+  transactionId: z.string().optional(),
+  screenshot: z.string().optional(),
+});
+
+export const cashDetailsSchema = z.object({
+  adminName: z.string().min(2),
+  location: z.string().optional(),
+});
+
+// Combined payment details schema
+export const paymentDetailsSchema = z.union([
+  upiDetailsSchema,
+  bankDetailsSchema,
+  cashDetailsSchema,
+]);

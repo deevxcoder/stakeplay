@@ -28,6 +28,8 @@ type LoginData = {
 
 type RegisterData = {
   username: string;
+  email: string;
+  mobile: string;
   password: string;
 };
 
@@ -76,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Registration successful",
-        description: `Welcome, ${user.username}! Your account has been created with 10,000 coins.`,
+        description: `Welcome, ${user.username}! Your account has been created. Please make a deposit to start playing.`,
       });
     },
     onError: (error: Error) => {

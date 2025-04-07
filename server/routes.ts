@@ -9,9 +9,17 @@ import {
   coinTossSchema,
   SATTA_MATKA_MULTIPLIER,
   COIN_TOSS_MULTIPLIER,
-  MULTIPLIERS
+  MULTIPLIERS,
+  insertDepositSchema,
+  insertWithdrawalSchema,
+  paymentDetailsSchema
 } from "@shared/schema";
 import { User } from "@shared/schema";
+import { 
+  sendWelcomeEmail, 
+  sendDepositStatusEmail, 
+  sendWithdrawalStatusEmail 
+} from "./email";
 
 // Middleware to ensure user is authenticated
 const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
@@ -288,6 +296,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(history);
     } catch (error) {
       console.error("Error fetching Coin Toss history:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // ----- Deposit Routes -----
+  
+  // Create a new deposit request
+  app.post("/api/deposits", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as User;
+      
+      // Validate the request body
+      const depositData = insertDepositSchema.parse({
+        ...req.body,
+        userId: user.id
+      });
+      
+      // Validate payment details based on payment mode
+      try {
+        paymentDetailsSchema.parse(depositData.details);
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: "Invalid payment details", 
+            errors: err.errors 
+          });
+        }
+      }
+      
+      // Create the deposit request
+      const deposit = await storage.createDeposit(depositData);
+      
+      return res.status(201).json(deposit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid input", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating deposit:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get user's deposit history
+  app.get("/api/deposits", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const deposits = await storage.getUserDeposits(user.id);
+      return res.json(deposits);
+    } catch (error) {
+      console.error("Error fetching deposits:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Admin route: Get all pending deposits
+  app.get("/api/admin/deposits/pending", ensureAuthenticated, async (req, res) => {
+    try {
+      // TODO: Add admin check here
+      const pendingDeposits = await storage.getAllPendingDeposits();
+      return res.json(pendingDeposits);
+    } catch (error) {
+      console.error("Error fetching pending deposits:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Admin route: Update deposit status
+  app.patch("/api/admin/deposits/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      // TODO: Add admin check here
+      const depositId = parseInt(req.params.id);
+      const { status, adminNote } = req.body;
+      
+      if (!["approved", "rejected"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const updatedDeposit = await storage.updateDepositStatus(
+        depositId, 
+        status, 
+        adminNote
+      );
+      
+      if (!updatedDeposit) {
+        return res.status(404).json({ message: "Deposit not found" });
+      }
+      
+      // Send email notification about deposit status update
+      const user = await storage.getUser(updatedDeposit.userId);
+      if (user && user.email) {
+        sendDepositStatusEmail(user, updatedDeposit).catch(error => {
+          console.error("Failed to send deposit status email:", error);
+        });
+      }
+      
+      return res.json(updatedDeposit);
+    } catch (error) {
+      console.error("Error updating deposit:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // ----- Withdrawal Routes -----
+  
+  // Create a new withdrawal request
+  app.post("/api/withdrawals", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as User;
+      
+      // Validate the request body
+      const withdrawalData = insertWithdrawalSchema.parse({
+        ...req.body,
+        userId: user.id
+      });
+      
+      // Check if user has enough balance
+      if (user.balance < withdrawalData.amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+      
+      // Validate payment details based on payment mode
+      try {
+        paymentDetailsSchema.parse(withdrawalData.details);
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: "Invalid payment details", 
+            errors: err.errors 
+          });
+        }
+      }
+      
+      // Create the withdrawal request (this will also deduct the amount from user's balance)
+      const withdrawal = await storage.createWithdrawal(withdrawalData);
+      
+      return res.status(201).json(withdrawal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid input", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating withdrawal:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get user's withdrawal history
+  app.get("/api/withdrawals", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const withdrawals = await storage.getUserWithdrawals(user.id);
+      return res.json(withdrawals);
+    } catch (error) {
+      console.error("Error fetching withdrawals:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Admin route: Get all pending withdrawals
+  app.get("/api/admin/withdrawals/pending", ensureAuthenticated, async (req, res) => {
+    try {
+      // TODO: Add admin check here
+      const pendingWithdrawals = await storage.getAllPendingWithdrawals();
+      return res.json(pendingWithdrawals);
+    } catch (error) {
+      console.error("Error fetching pending withdrawals:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Admin route: Update withdrawal status
+  app.patch("/api/admin/withdrawals/:id", ensureAuthenticated, async (req, res) => {
+    try {
+      // TODO: Add admin check here
+      const withdrawalId = parseInt(req.params.id);
+      const { status, adminNote } = req.body;
+      
+      if (!["approved", "rejected"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const updatedWithdrawal = await storage.updateWithdrawalStatus(
+        withdrawalId, 
+        status, 
+        adminNote
+      );
+      
+      if (!updatedWithdrawal) {
+        return res.status(404).json({ message: "Withdrawal not found" });
+      }
+      
+      // Send email notification about withdrawal status update
+      const user = await storage.getUser(updatedWithdrawal.userId);
+      if (user && user.email) {
+        sendWithdrawalStatusEmail(user, updatedWithdrawal).catch(error => {
+          console.error("Failed to send withdrawal status email:", error);
+        });
+      }
+      
+      return res.json(updatedWithdrawal);
+    } catch (error) {
+      console.error("Error updating withdrawal:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   });

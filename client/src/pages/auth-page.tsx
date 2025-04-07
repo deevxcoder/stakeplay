@@ -25,6 +25,12 @@ const registerSchema = z.object({
   username: z.string().min(3, {
     message: "Username must be at least 3 characters.",
   }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  mobile: z.string().min(10, {
+    message: "Please enter a valid mobile number.",
+  }),
   password: z.string().min(6, {
     message: "Password must be at least 6 characters.",
   }),
@@ -60,6 +66,8 @@ export default function AuthPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
+      email: "",
+      mobile: "",
       password: "",
       confirmPassword: "",
     },
@@ -164,6 +172,32 @@ export default function AuthPage() {
                               <FormLabel>Username</FormLabel>
                               <FormControl>
                                 <Input placeholder="Choose a username" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={registerForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="Enter your email" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={registerForm.control}
+                          name="mobile"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mobile Number</FormLabel>
+                              <FormControl>
+                                <Input type="tel" placeholder="Enter your mobile number" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

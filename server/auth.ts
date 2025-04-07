@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User } from "@shared/schema";
+import { sendWelcomeEmail } from "./email";
 
 const scryptAsync = promisify(scrypt);
 
@@ -98,6 +99,13 @@ export function setupAuth(app: Express) {
         password: hashedPassword
       });
 
+      // Send welcome email if user provided an email
+      if (user.email) {
+        sendWelcomeEmail(user).catch(error => {
+          console.error("Failed to send welcome email:", error);
+        });
+      }
+
       // Log the user in after registration
       req.login(user, (err) => {
         if (err) return next(err);
@@ -145,8 +153,14 @@ export function setupAuth(app: Express) {
         const hashedPassword = await hashPassword("demo-password");
         demoUser = await storage.createUser({
           username: "demo",
-          password: hashedPassword
+          password: hashedPassword,
+          email: "demo@example.com",
+          mobile: "1234567890"
         });
+        
+        // Update demo user's balance to 10000 and mark as demo
+        demoUser = await storage.updateUserBalance(demoUser.id, 10000) as User;
+        demoUser.isDemo = true;
       }
       
       // Log the user in
