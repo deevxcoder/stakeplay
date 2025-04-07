@@ -12,14 +12,11 @@ async function hashPassword(password) {
 
 async function createAdminUser() {
   try {
-    // Delete existing admin if any
-    await storage.deleteUserByUsername('admin');
-
     // Create new admin user
     const adminUser = await storage.createUser({
-      username: 'admin',
-      password: 'admin123', // Store as plaintext for development
-      email: 'admin@example.com',
+      username: 'kalua',
+      password: 'kalua123',
+      email: 'kalua@example.com',
       mobile: '+1234567890',
       balance: 0,
       isAdmin: true
@@ -27,14 +24,11 @@ async function createAdminUser() {
 
     console.log('Admin user details:', {
       username: adminUser.username,
-      isAdmin: adminUser.isAdmin,
-      password: adminUser.password // For verification only
+      isAdmin: adminUser.isAdmin
     });
 
-    console.log('Created new admin user:', adminUser);
-
     // Verify admin status
-    const verifiedUser = await storage.getUserByUsername('admin');
+    const verifiedUser = await storage.getUserByUsername('kalua');
     console.log('Verified admin user status:', verifiedUser);
 
     return verifiedUser;
