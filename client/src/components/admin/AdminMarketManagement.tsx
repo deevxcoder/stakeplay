@@ -544,13 +544,13 @@ export default function AdminMarketManagement() {
 
       {/* Edit Market Dialog */}
       <Dialog open={isEditMarketOpen} onOpenChange={setIsEditMarketOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>{marketFormData.id ? "Edit Market" : "Create New Market"}</DialogTitle>
             <DialogDescription>{marketFormData.id ? "Update market details and timings" : "Create a new market with details and timings"}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleMarketFormSubmit}>
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-4 py-4 overflow-y-auto pr-6" style={{ maxHeight: "calc(90vh - 200px)" }}>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="displayName" className="text-right">
                   Display Name
