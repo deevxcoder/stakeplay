@@ -3,7 +3,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Coins, Sparkles, AlertOctagon, UserPlus, History, 
-  Settings, LogOut, ChevronDown, UserCircle, Wallet, User
+  Settings, LogOut, ChevronDown, UserCircle, Wallet, User,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
