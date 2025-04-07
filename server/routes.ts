@@ -583,10 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/markets", ensureAdmin, async (req, res) => {
     try {
       const markets = await storage.getAllMarkets();
-      const defaultMarkets = [
-        {
-          id: "gali",
-          name: "Gali Market",
+      return res.json(markets);
           displayName: "Gali",
           description: "Popular market with daily results",
           openTime: "10:00",
