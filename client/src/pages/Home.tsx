@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import GameSelection from "@/components/GameSelection";
 import SattaMatkaGame from "@/components/SattaMatkaGame";
 import CoinTossGame from "@/components/CoinTossGame";
@@ -64,10 +62,8 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen text-white">
-      <Header />
-      
-      <main className="flex-1 container mx-auto px-4 py-8 overflow-auto">
+    <div>
+      <main className="container mx-auto px-4 py-8 overflow-auto">
         {/* Welcome Section */}
         <div className="mb-10 text-center">
           <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-amber-400 via-primary to-emerald-400 bg-clip-text text-transparent">
@@ -220,8 +216,6 @@ const Home: React.FC = () => {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 };
