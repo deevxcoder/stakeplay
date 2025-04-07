@@ -3,6 +3,10 @@ import {
   bets, type Bet, type InsertBet,
   gameHistory, type GameHistory, type InsertGameHistory
 } from "@shared/schema";
+import session from "express-session";
+import createMemoryStore from "memorystore";
+
+const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   // User operations
@@ -18,6 +22,9 @@ export interface IStorage {
   // Game history operations
   addGameHistory(history: InsertGameHistory): Promise<GameHistory>;
   getGameHistory(gameType: string, limit?: number): Promise<GameHistory[]>;
+  
+  // Session store
+  sessionStore: any; // Using any to avoid type issues with session store
 }
 
 export class MemStorage implements IStorage {
@@ -27,6 +34,7 @@ export class MemStorage implements IStorage {
   private userIdCounter: number;
   private betIdCounter: number;
   private historyIdCounter: number;
+  sessionStore: any; // Using any to avoid type issues with session store
 
   constructor() {
     this.users = new Map();
@@ -35,6 +43,9 @@ export class MemStorage implements IStorage {
     this.userIdCounter = 1;
     this.betIdCounter = 1;
     this.historyIdCounter = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // Prune expired sessions every 24 hours
+    });
     
     // Add a default demo user
     this.createUser({
@@ -74,11 +85,19 @@ export class MemStorage implements IStorage {
   async createBet(insertBet: InsertBet): Promise<Bet> {
     const id = this.betIdCounter++;
     const now = new Date();
+    
+    // Ensure market and betType are set to null if not provided
+    const market = insertBet.market ?? null;
+    const betType = insertBet.betType ?? null;
+    
     const bet: Bet = { 
       ...insertBet, 
       id, 
-      createdAt: now
+      createdAt: now,
+      market,
+      betType
     };
+    
     this.bets.set(id, bet);
     return bet;
   }
@@ -87,7 +106,8 @@ export class MemStorage implements IStorage {
     const userBets = Array.from(this.bets.values())
       .filter(bet => bet.userId === userId)
       .sort((a, b) => {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (b.createdAt instanceof Date ? b.createdAt.getTime() : 0) - 
+               (a.createdAt instanceof Date ? a.createdAt.getTime() : 0);
       });
     
     return userBets.slice(0, limit);
@@ -97,11 +117,17 @@ export class MemStorage implements IStorage {
   async addGameHistory(insertHistory: InsertGameHistory): Promise<GameHistory> {
     const id = this.historyIdCounter++;
     const now = new Date();
+    
+    // Ensure market is set to null if not provided
+    const market = insertHistory.market ?? null;
+    
     const history: GameHistory = {
       ...insertHistory,
       id,
-      timestamp: now
+      timestamp: now,
+      market
     };
+    
     this.history.set(id, history);
     return history;
   }
@@ -110,7 +136,8 @@ export class MemStorage implements IStorage {
     const gameHistories = Array.from(this.history.values())
       .filter(history => history.gameType === gameType)
       .sort((a, b) => {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+        return (b.timestamp instanceof Date ? b.timestamp.getTime() : 0) - 
+               (a.timestamp instanceof Date ? a.timestamp.getTime() : 0);
       });
     
     return gameHistories.slice(0, limit);

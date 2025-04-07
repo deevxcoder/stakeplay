@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useUser } from "@/context/UserContext";
+import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Coins, Sparkles, AlertOctagon, UserPlus, History, 
-  Settings, LogOut, ChevronDown, UserCircle, User
+  Settings, LogOut, ChevronDown, UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,12 +13,12 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useLocation } from "wouter";
 
 const Header: React.FC = () => {
-  const { user, isLoading, loginAsDemo, logout } = useUser();
+  const { user, isLoading, loginAsDemo, logoutMutation } = useAuth();
   const [demoInfoOpen, setDemoInfoOpen] = useState(false);
-  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
+  const [, navigate] = useLocation();
 
   const handleDemoLogin = () => {
     loginAsDemo();
@@ -27,8 +27,12 @@ const Header: React.FC = () => {
   
   const handleLogout = () => {
     if (user && window.confirm("Are you sure you want to log out?")) {
-      logout();
+      logoutMutation.mutate();
     }
+  };
+  
+  const goToAuth = () => {
+    navigate("/auth");
   };
 
   return (
@@ -98,7 +102,7 @@ const Header: React.FC = () => {
                   <Coins className="mr-2 h-4 w-4 text-amber-400" />
                   <span>Login as Demo User</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRegisterDialogOpen(true)} className="cursor-pointer">
+                <DropdownMenuItem onClick={goToAuth} className="cursor-pointer">
                   <UserPlus className="mr-2 h-4 w-4" />
                   <span>Register</span>
                 </DropdownMenuItem>
@@ -148,7 +152,7 @@ const Header: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="text-xl">Welcome to Demo Mode!</DialogTitle>
             <DialogDescription>
-              You're now using a demo account with 1,000 virtual coins to test our betting platform.
+              You're now using a demo account with 10,000 virtual coins to test our betting platform.
             </DialogDescription>
           </DialogHeader>
           
@@ -160,13 +164,13 @@ const Header: React.FC = () => {
               </h4>
               <ul className="text-sm mt-2 space-y-1 ml-7 list-disc">
                 <li>All winnings are virtual and cannot be withdrawn</li>
-                <li>Limited to 1,000 virtual coins</li>
+                <li>Limited to 10,000 virtual coins</li>
                 <li>Some features are restricted</li>
               </ul>
             </div>
             
             <p className="text-sm text-center">
-              Ready to win real prizes? Create a real account!
+              Ready to play with a permanent account? Register now!
             </p>
           </div>
           
@@ -181,56 +185,9 @@ const Header: React.FC = () => {
             <Button 
               onClick={() => {
                 setDemoInfoOpen(false);
-                setRegisterDialogOpen(true);
+                goToAuth();
               }}
               className="flex-1 bg-gradient-to-r from-amber-500 to-primary"
-            >
-              Create Real Account
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Register Dialog */}
-      <Dialog open={registerDialogOpen} onOpenChange={setRegisterDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Create Your Account</DialogTitle>
-            <DialogDescription>
-              Join thousands of players winning real prizes every day!
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
-              <h4 className="font-medium flex items-center text-primary">
-                <Sparkles className="h-5 w-5 mr-2" />
-                Benefits of a Real Account
-              </h4>
-              <ul className="text-sm mt-2 space-y-1 ml-7 list-disc">
-                <li>Win real prizes and withdraw your winnings</li>
-                <li>Exclusive bonuses and promotions</li>
-                <li>Access to all betting features</li>
-                <li>24/7 customer support</li>
-              </ul>
-            </div>
-            
-            <p className="text-sm text-center">
-              This is just a demo. In a real application, there would be a registration form here.
-            </p>
-          </div>
-          
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setRegisterDialogOpen(false)}
-              className="sm:flex-1"
-            >
-              Maybe Later
-            </Button>
-            <Button 
-              onClick={() => setRegisterDialogOpen(false)}
-              className="sm:flex-1 bg-gradient-to-r from-amber-500 to-primary"
             >
               Create Account
             </Button>

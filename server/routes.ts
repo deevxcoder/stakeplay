@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import { z } from "zod";
 import { 
   sattaMatkaSchema,
@@ -10,34 +11,29 @@ import {
   COIN_TOSS_MULTIPLIER,
   MULTIPLIERS
 } from "@shared/schema";
+import { User } from "@shared/schema";
+
+// Middleware to ensure user is authenticated
+const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Not authenticated" });
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // User routes
-  app.get("/api/user", async (req, res) => {
-    // For demo purposes, always return the demo user
-    const user = await storage.getUserByUsername("demo");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    // Don't return password
-    const { password, ...userWithoutPassword } = user;
-    return res.json(userWithoutPassword);
-  });
-
+  // Set up authentication
+  setupAuth(app);
+  
   // Get user's recent bets
-  app.get("/api/user/bets", async (req, res) => {
-    const user = await storage.getUserByUsername("demo");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
+  app.get("/api/user/bets", ensureAuthenticated, async (req, res) => {
+    const user = req.user as User;
     const bets = await storage.getUserBets(user.id, 10);
     return res.json(bets);
   });
 
   // Updated Satta Matka game routes
-  app.post("/api/games/matka/play", async (req, res) => {
+  app.post("/api/games/matka/play", ensureAuthenticated, async (req, res) => {
     try {
       // Try the new schema first, fall back to legacy schema if that fails
       let betData;
@@ -51,11 +47,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isLegacy = true;
       }
       
-      // Get user
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      // Get authenticated user
+      const user = req.user as User;
       
       // Check if user has enough balance
       if (user.balance < betData.betAmount) {
@@ -208,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get Satta Matka history (allow filtering by market)
-  app.get("/api/games/matka/history", async (req, res) => {
+  app.get("/api/games/matka/history", ensureAuthenticated, async (req, res) => {
     try {
       const market = req.query.market as string;
       let history;
@@ -229,17 +222,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Coin Toss game routes (unchanged)
-  app.post("/api/games/coin/play", async (req, res) => {
+  // Coin Toss game routes
+  app.post("/api/games/coin/play", ensureAuthenticated, async (req, res) => {
     try {
       const validatedData = coinTossSchema.parse(req.body);
       const { choice, betAmount } = validatedData;
       
-      // Get user
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      // Get authenticated user
+      const user = req.user as User;
       
       // Check if user has enough balance
       if (user.balance < betAmount) {
@@ -292,9 +282,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get Coin Toss history
-  app.get("/api/games/coin/history", async (req, res) => {
-    const history = await storage.getGameHistory("coin_toss", 10);
-    return res.json(history);
+  app.get("/api/games/coin/history", ensureAuthenticated, async (req, res) => {
+    try {
+      const history = await storage.getGameHistory("coin_toss", 10);
+      return res.json(history);
+    } catch (error) {
+      console.error("Error fetching Coin Toss history:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
   });
 
   // Create HTTP server

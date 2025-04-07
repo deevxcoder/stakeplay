@@ -2,13 +2,19 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/not-found";
-import DemoBanner from "@/components/DemoBanner";
-import { UserProvider } from "@/context/UserContext";
+import AuthPage from "@/pages/auth-page";
+import { ProtectedRoute } from "./lib/protected-route";
+import { AuthProvider } from "@/hooks/use-auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a client
+const queryClient = new QueryClient();
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <ProtectedRoute path="/" component={Home} />
+      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -16,11 +22,12 @@ function Router() {
 
 function App() {
   return (
-    <UserProvider>
-      <Router />
-      <DemoBanner />
-      <Toaster />
-    </UserProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
