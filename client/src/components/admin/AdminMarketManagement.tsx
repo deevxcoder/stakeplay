@@ -51,7 +51,7 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
-import { format, parse } from "date-fns";
+import { format, parse, addMonths } from "date-fns";
 
 interface Market {
   id: string;
@@ -65,6 +65,10 @@ interface Market {
   color: string;
   latestResult?: string;
   resultDate?: string;
+  startDate: string;
+  endDate: string;
+  coverImage: string;
+  allowedBetTypes: string[];
 }
 
 interface MarketResult {
@@ -84,32 +88,36 @@ export default function AdminMarketManagement() {
     name: "",
     displayName: "",
     description: "",
-    openTime: "",
-    closeTime: "",
-    resultTime: "",
+    openTime: "09:00",
+    closeTime: "17:00",
+    resultTime: "17:30",
     color: "#6366f1",
+    startDate: format(new Date(), "yyyy-MM-dd"),
+    endDate: format(addMonths(new Date(), 1), "yyyy-MM-dd"),
+    coverImage: "",
+    allowedBetTypes: ["jodi", "oddEven", "cross", "hurf"],
   });
   const [resultFormData, setResultFormData] = useState({
     result: "",
     date: format(new Date(), "yyyy-MM-dd"),
   });
   const [activeTab, setActiveTab] = useState("markets");
-  
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   // Fetch markets
   const { data: markets = [], isLoading: isLoadingMarkets } = useQuery<Market[]>({
     queryKey: ["/api/admin/markets"],
     retry: false,
   });
-  
+
   // Fetch results
   const { data: results = [], isLoading: isLoadingResults } = useQuery<MarketResult[]>({
     queryKey: ["/api/admin/results"],
     retry: false,
   });
-  
+
   // Create/Update market mutation
   const updateMarketMutation = useMutation({
     mutationFn: async (marketData: Partial<Market>) => {
@@ -140,7 +148,7 @@ export default function AdminMarketManagement() {
       });
     },
   });
-  
+
   // Add result mutation
   const addResultMutation = useMutation({
     mutationFn: async (data: { marketId: string; result: string; date: string }) => {
@@ -164,7 +172,7 @@ export default function AdminMarketManagement() {
       });
     },
   });
-  
+
   // Handle edit market
   const handleEditMarket = (market: Market) => {
     setSelectedMarket(market);
@@ -177,10 +185,14 @@ export default function AdminMarketManagement() {
       closeTime: market.closeTime,
       resultTime: market.resultTime,
       color: market.color,
+      startDate: market.startDate,
+      endDate: market.endDate,
+      coverImage: market.coverImage,
+      allowedBetTypes: market.allowedBetTypes,
     });
     setIsEditMarketOpen(true);
   };
-  
+
   // Handle add result
   const handleAddResult = (market: Market) => {
     setSelectedMarket(market);
@@ -190,16 +202,16 @@ export default function AdminMarketManagement() {
     });
     setIsAddResultOpen(true);
   };
-  
+
   // Handle market form change
-  const handleMarketFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setMarketFormData({
-      ...marketFormData,
-      [name]: value,
-    });
+  const handleMarketFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type, checked } = e.target;
+    setMarketFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
-  
+
   // Handle result form change
   const handleResultFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -208,13 +220,13 @@ export default function AdminMarketManagement() {
       [name]: value,
     });
   };
-  
+
   // Handle market form submit
   const handleMarketFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateMarketMutation.mutate(marketFormData);
   };
-  
+
   // Handle result form submit
   const handleResultFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,7 +238,7 @@ export default function AdminMarketManagement() {
       });
     }
   };
-  
+
   const formatTime = (timeString: string) => {
     try {
       const [hours, minutes] = timeString.split(':');
@@ -235,7 +247,7 @@ export default function AdminMarketManagement() {
       return null;
     }
   };
-  
+
   const getMarketStatus = (market: Market) => {
     const now = new Date();
     const currentHours = now.getHours();
@@ -244,10 +256,10 @@ export default function AdminMarketManagement() {
 
     const openTimeParts = market.openTime.split(':');
     const openTimeInMinutes = parseInt(openTimeParts[0]) * 60 + parseInt(openTimeParts[1]);
-    
+
     const closeTimeParts = market.closeTime.split(':');
     const closeTimeInMinutes = parseInt(closeTimeParts[0]) * 60 + parseInt(closeTimeParts[1]);
-    
+
     const resultTimeParts = market.resultTime.split(':');
     const resultTimeInMinutes = parseInt(resultTimeParts[0]) * 60 + parseInt(resultTimeParts[1]);
 
@@ -260,7 +272,7 @@ export default function AdminMarketManagement() {
       return "open";
     }
   };
-  
+
   const formatTimeDisplay = (timeString: string) => {
     try {
       const [hours, minutes] = timeString.split(':');
@@ -271,7 +283,7 @@ export default function AdminMarketManagement() {
       return timeString;
     }
   };
-  
+
   const formatDateDisplay = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -280,14 +292,14 @@ export default function AdminMarketManagement() {
       return dateString;
     }
   };
-  
+
   // Filter results for the selected market
   const getMarketResults = (marketId: string) => {
     return results
       .filter(result => result.marketId === marketId)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
-  
+
   return (
     <div>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -301,7 +313,7 @@ export default function AdminMarketManagement() {
             Results History
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="markets">
           <Card>
             <CardHeader>
@@ -322,6 +334,10 @@ export default function AdminMarketManagement() {
                       closeTime: "17:00",
                       resultTime: "17:30",
                       color: "#6366f1",
+                      startDate: format(new Date(), "yyyy-MM-dd"),
+                      endDate: format(addMonths(new Date(), 1), "yyyy-MM-dd"),
+                      coverImage: "",
+                      allowedBetTypes: ["jodi", "oddEven", "cross", "hurf"],
                     });
                     setIsEditMarketOpen(true);
                   }}
@@ -353,7 +369,7 @@ export default function AdminMarketManagement() {
                         const status = getMarketStatus(market);
                         const marketResults = getMarketResults(market.id);
                         const latestResult = marketResults.length > 0 ? marketResults[0] : null;
-                        
+
                         return (
                           <TableRow key={market.id}>
                             <TableCell>
@@ -438,7 +454,7 @@ export default function AdminMarketManagement() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="results">
           <Card>
             <CardHeader>
@@ -472,7 +488,7 @@ export default function AdminMarketManagement() {
                           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                           .map((result) => {
                             const market = markets.find(m => m.id === result.marketId);
-                            
+
                             return (
                               <TableRow key={result.id}>
                                 <TableCell>{result.id}</TableCell>
@@ -506,7 +522,7 @@ export default function AdminMarketManagement() {
           </Card>
         </TabsContent>
       </Tabs>
-      
+
       {/* Edit Market Dialog */}
       <Dialog open={isEditMarketOpen} onOpenChange={setIsEditMarketOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -598,6 +614,63 @@ export default function AdminMarketManagement() {
                   />
                 </div>
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startDate" className="text-right">
+                  Start Date
+                </Label>
+                <Input
+                  id="startDate"
+                  name="startDate"
+                  type="date"
+                  value={marketFormData.startDate}
+                  onChange={handleMarketFormChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="endDate" className="text-right">
+                  End Date
+                </Label>
+                <Input
+                  id="endDate"
+                  name="endDate"
+                  type="date"
+                  value={marketFormData.endDate}
+                  onChange={handleMarketFormChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="coverImage" className="text-right">
+                  Cover Image
+                </Label>
+                <Input
+                  id="coverImage"
+                  name="coverImage"
+                  type="file"
+                  onChange={handleMarketFormChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="allowedBetTypes" className="text-right">
+                  Allowed Bet Types
+                </Label>
+                <div className="col-span-3">
+                  <Select name="allowedBetTypes" value={marketFormData.allowedBetTypes} onChange={handleMarketFormChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select bet types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={["jodi"]}>Jodi</SelectItem>
+                      <SelectItem value={["oddEven"]}>Odd/Even</SelectItem>
+                      <SelectItem value={["cross"]}>Cross</SelectItem>
+                      <SelectItem value={["hurf"]}>Hurf</SelectItem>
+                      <SelectItem value={["jodi", "oddEven", "cross", "hurf"]}>All</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button
@@ -614,7 +687,7 @@ export default function AdminMarketManagement() {
           </form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Add Result Dialog */}
       <Dialog open={isAddResultOpen} onOpenChange={setIsAddResultOpen}>
         <DialogContent className="sm:max-w-[500px]">
