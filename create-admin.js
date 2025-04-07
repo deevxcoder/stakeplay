@@ -18,11 +18,17 @@ async function createAdminUser() {
     // Create new admin user
     const adminUser = await storage.createUser({
       username: 'admin',
-      password: 'admin123',
+      password: 'admin123', // Store as plaintext for development
       email: 'admin@example.com',
       mobile: '+1234567890',
       balance: 0,
       isAdmin: true
+    });
+
+    console.log('Admin user details:', {
+      username: adminUser.username,
+      isAdmin: adminUser.isAdmin,
+      password: adminUser.password // For verification only
     });
 
     console.log('Created new admin user:', adminUser);
