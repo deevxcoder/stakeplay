@@ -43,6 +43,7 @@ export default function AdminUserManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
     username: "",
     email: "",
@@ -61,6 +62,29 @@ export default function AdminUserManagement() {
     retry: false,
   });
   
+  // Create user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: { username: string; email: string; password: string; isAdmin: boolean }) => {
+      const res = await apiRequest("POST", "/api/admin/users", userData);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "User created",
+        description: "New user has been created successfully.",
+      });
+      setIsAddUserDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Creation failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Edit user mutation
   const editUserMutation = useMutation({
     mutationFn: async (userData: Partial<User> & { id: number }) => {
@@ -180,8 +204,17 @@ export default function AdminUserManagement() {
           <CardDescription>Manage user accounts, balance, and permissions</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
+          <div className="flex justify-between mb-4">
             <Input
+              placeholder="Search users by name, email or mobile..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Button onClick={() => setIsAddUserDialogOpen(true)}>
+              Add User
+            </Button>
+          </div>
               placeholder="Search users by name, email or mobile..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -391,6 +424,92 @@ export default function AdminUserManagement() {
               </Button>
               <Button type="submit" disabled={editUserMutation.isPending}>
                 {editUserMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            createUserMutation.mutate({
+              username: formData.get("username") as string,
+              email: formData.get("email") as string,
+              password: formData.get("password") as string,
+              isAdmin: formData.get("isAdmin") === "true"
+            });
+          }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="username" className="text-right">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  name="username"
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="password" className="text-right">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="isAdmin" className="text-right">
+                  Admin
+                </Label>
+                <Select name="isAdmin" defaultValue="false">
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="false">User</SelectItem>
+                    <SelectItem value="true">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddUserDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createUserMutation.isPending}>
+                {createUserMutation.isPending ? "Creating..." : "Create User"}
               </Button>
             </DialogFooter>
           </form>
