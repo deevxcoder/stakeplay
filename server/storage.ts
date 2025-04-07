@@ -104,7 +104,9 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username));
+    const result = await db.select().from(users).where(
+      eq(users.username.toLowerCase(), username.toLowerCase())
+    );
     return result[0];
   }
 
