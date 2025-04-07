@@ -40,14 +40,22 @@ interface GameHistoryItem {
   market?: string;
 }
 
-const SattaMatkaGame: React.FC = () => {
+interface SattaMatkaGameProps {
+  initialMarket?: MarketType;
+  initialBetType?: BetType;
+}
+
+const SattaMatkaGame: React.FC<SattaMatkaGameProps> = ({ 
+  initialMarket = "gali", 
+  initialBetType = "jodi" 
+}) => {
   const { user, updateBalance } = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   // States for game
-  const [betType, setBetType] = useState<BetType>("jodi");
-  const [market, setMarket] = useState<MarketType>("gali");
+  const [betType, setBetType] = useState<BetType>(initialBetType);
+  const [market, setMarket] = useState<MarketType>(initialMarket);
   const [betAmount, setBetAmount] = useState<number>(100);
   const [showResults, setShowResults] = useState<boolean>(false);
   const [gameResult, setGameResult] = useState<SattaMatkaResult | null>(null);
@@ -380,22 +388,13 @@ const SattaMatkaGame: React.FC = () => {
                 </p>
               </div>
 
-              {/* Market Selection */}
+              {/* Market Info */}
               <div className="bg-surface-light/50 rounded-lg p-3">
                 <h4 className="text-base font-medium mb-2 flex items-center text-primary">
-                  <Target className="h-4 w-4 mr-2" /> Select Market
+                  <Target className="h-4 w-4 mr-2" /> Current Market
                 </h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['gali', 'dishawar', 'mumbai'] as MarketType[]).map((mkt) => (
-                    <Button
-                      key={mkt}
-                      variant={market === mkt ? "default" : "outline"}
-                      className={`py-1 h-auto ${market === mkt ? "bg-primary" : "bg-surface border border-white/10"}`}
-                      onClick={() => setMarket(mkt)}
-                    >
-                      {formatMarketName(mkt)}
-                    </Button>
-                  ))}
+                <div className="bg-primary/20 text-primary px-3 py-2 rounded-lg text-center font-semibold">
+                  {formatMarketName(market)}
                 </div>
               </div>
 
@@ -511,7 +510,7 @@ const SattaMatkaGame: React.FC = () => {
                   </div>
 
                   {/* Bet Type Tabs */}
-                  <Tabs defaultValue="jodi" onValueChange={(value) => setBetType(value as BetType)} className="mb-6">
+                  <Tabs defaultValue={betType} onValueChange={(value) => setBetType(value as BetType)} className="mb-6">
                     <TabsList className="grid grid-cols-4 bg-surface-light mb-4">
                       <TabsTrigger value="jodi" className="data-[state=active]:bg-primary">
                         <Hash className="h-4 w-4 mr-2" />

@@ -1,18 +1,60 @@
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import GameTabs from "@/components/GameTabs";
+import GameSelection from "@/components/GameSelection";
 import SattaMatkaGame from "@/components/SattaMatkaGame";
 import CoinTossGame from "@/components/CoinTossGame";
 import BetsHistory from "@/components/BetsHistory";
+import MatkaMarkets, { MarketType } from "@/components/MatkaMarkets";
+import BetTypeSelection, { BetType } from "@/components/BetTypeSelection";
 
 type GameType = "matka" | "coin";
 
-const Home: React.FC = () => {
-  const [activeGame, setActiveGame] = useState<GameType>("matka");
+// Define navigation states
+type NavState = "selection" | "game" | "markets" | "betType";
 
-  const handleChangeGame = (game: GameType) => {
+const Home: React.FC = () => {
+  // Game selection state
+  const [activeGame, setActiveGame] = useState<GameType | null>(null);
+  
+  // Navigation state
+  const [navState, setNavState] = useState<NavState>("selection");
+  
+  // Market and bet type states for Satta Matka
+  const [selectedMarket, setSelectedMarket] = useState<MarketType>("gali");
+  const [selectedBetType, setSelectedBetType] = useState<BetType>("jodi");
+
+  // Handle game selection
+  const handleSelectGame = (game: GameType) => {
     setActiveGame(game);
+    
+    if (game === "matka") {
+      setNavState("markets");
+    } else {
+      setNavState("game");
+    }
+  };
+
+  // Handle market selection
+  const handleSelectMarket = (market: MarketType) => {
+    setSelectedMarket(market);
+    setNavState("betType");
+  };
+
+  // Handle bet type selection
+  const handleSelectBetType = (betType: BetType) => {
+    setSelectedBetType(betType);
+    setNavState("game");
+  };
+
+  // Navigation back handlers
+  const handleBackToGames = () => {
+    setNavState("selection");
+    setActiveGame(null);
+  };
+
+  const handleBackToMarkets = () => {
+    setNavState("markets");
   };
 
   return (
@@ -31,15 +73,61 @@ const Home: React.FC = () => {
           </p>
         </div>
         
-        {/* Game Tabs */}
-        <GameTabs activeGame={activeGame} onChangeGame={handleChangeGame} />
-
-        {/* Game Containers */}
-        <div className="game-containers mb-12">
-          {activeGame === "matka" ? (
-            <SattaMatkaGame />
-          ) : (
-            <CoinTossGame />
+        {/* Game Navigation */}
+        <div className="game-navigation mb-12">
+          {navState === "selection" && (
+            <GameSelection onSelectGame={handleSelectGame} />
+          )}
+          
+          {navState === "markets" && activeGame === "matka" && (
+            <MatkaMarkets 
+              onSelectMarket={handleSelectMarket} 
+              onGoBack={handleBackToGames} 
+            />
+          )}
+          
+          {navState === "betType" && activeGame === "matka" && (
+            <BetTypeSelection 
+              market={selectedMarket}
+              onSelectBetType={handleSelectBetType}
+              onGoBack={handleBackToMarkets}
+            />
+          )}
+          
+          {navState === "game" && (
+            <div>
+              {activeGame === "matka" ? (
+                <div>
+                  <div className="mb-4 flex items-center">
+                    <button 
+                      onClick={handleBackToGames}
+                      className="text-white/70 hover:text-white text-sm flex items-center mr-4"
+                    >
+                      ← Back to Games
+                    </button>
+                    <span className="text-primary text-sm">
+                      Playing Satta Matka / {selectedMarket} Market / {selectedBetType} Bet
+                    </span>
+                  </div>
+                  <SattaMatkaGame
+                    initialMarket={selectedMarket}
+                    initialBetType={selectedBetType} 
+                  />
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-4">
+                    <button 
+                      onClick={handleBackToGames}
+                      className="text-white/70 hover:text-white text-sm flex items-center"
+                    >
+                      ← Back to Games
+                    </button>
+                  </div>
+                  <CoinTossGame />
+                </div>
+              )}
+            </div>
           )}
         </div>
 
