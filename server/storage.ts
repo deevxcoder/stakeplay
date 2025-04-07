@@ -16,6 +16,9 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(userId: number, newBalance: number): Promise<User | undefined>;
+  updateUser(userId: number, updateData: Partial<User>): Promise<User | undefined>;
+  verifyPassword(userId: number, password: string): Promise<boolean>;
+  updatePassword(userId: number, newPassword: string): Promise<User | undefined>;
   
   // Bet operations
   createBet(bet: InsertBet): Promise<Bet>;
@@ -104,6 +107,44 @@ export class MemStorage implements IStorage {
     if (!user) return undefined;
     
     const updatedUser = { ...user, balance: newBalance };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUser(userId: number, updateData: Partial<User>): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    
+    // Only allow updating specific fields
+    const allowedFields = ['email', 'mobile'];
+    const filteredUpdateData: Partial<User> = {};
+    
+    Object.keys(updateData).forEach(key => {
+      if (allowedFields.includes(key)) {
+        (filteredUpdateData as any)[key] = (updateData as any)[key];
+      }
+    });
+    
+    const updatedUser = { ...user, ...filteredUpdateData };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async verifyPassword(userId: number, password: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    
+    // In a real application, this would use bcrypt or scrypt to compare hashed passwords
+    // For this demo, we're doing a simple comparison
+    return user.password === password;
+  }
+  
+  async updatePassword(userId: number, newPassword: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    
+    // In a real application, this would hash the password before storing
+    const updatedUser = { ...user, password: newPassword };
     this.users.set(userId, updatedUser);
     return updatedUser;
   }

@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Coins, Sparkles, AlertOctagon, UserPlus, History, 
-  Settings, LogOut, ChevronDown, UserCircle
+  Settings, LogOut, ChevronDown, UserCircle, Wallet, User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,7 +13,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 const Header: React.FC = () => {
   const { user, isLoading, loginAsDemo, logoutMutation } = useAuth();
@@ -112,11 +112,19 @@ const Header: React.FC = () => {
                   {user.username}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/wallet")}>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  <span>Wallet</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/wallet?tab=bets")}>
                   <History className="mr-2 h-4 w-4" />
                   <span>Betting History</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
