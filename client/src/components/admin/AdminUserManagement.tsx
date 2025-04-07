@@ -215,7 +215,6 @@ export default function AdminUserManagement() {
               Add User
             </Button>
           </div>
-          </div>
           
           {isLoading ? (
             <div className="text-center py-4">Loading users...</div>
