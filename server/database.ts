@@ -1,6 +1,7 @@
 
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import pg from "pg";
+const { Pool } = pg;
 import { text, integer, boolean, timestamp, jsonb, pgTable } from "drizzle-orm/pg-core";
 
 // Create a PostgreSQL pool
