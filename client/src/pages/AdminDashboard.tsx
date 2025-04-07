@@ -51,13 +51,14 @@ export default function AdminDashboard() {
         </div>
         
         <div className="flex-1 overflow-y-auto py-4">
-          <nav className="px-2 space-y-1">
-            <TabsList className="flex flex-col h-auto bg-transparent space-y-1 w-full">
-              <TabsTrigger 
-                value="overview" 
-                className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
-                onClick={() => setActiveTab("overview")}
-              >
+          <Tabs defaultValue="overview" className="w-full" value={activeTab}>
+            <nav className="px-2 space-y-1">
+              <TabsList className="flex flex-col h-auto bg-transparent space-y-1 w-full">
+                <TabsTrigger 
+                  value="overview" 
+                  className="justify-start w-full data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700"
+                  onClick={() => setActiveTab("overview")}
+                >
                 <LayoutDashboard className="h-5 w-5 mr-3" />
                 Dashboard
               </TabsTrigger>

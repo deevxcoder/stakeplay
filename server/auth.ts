@@ -136,11 +136,14 @@ export function setupAuth(app: Express) {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info.message || "Authentication failed" });
       
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) return next(err);
         
-        // Return user data without password, ensure isAdmin is included
-        const { password, ...userWithoutPassword } = user;
+        // Check admin status from storage
+        const userWithAdminStatus = await storage.getUserByUsername(user.username);
+        
+        // Return user data without password
+        const { password, ...userWithoutPassword } = userWithAdminStatus;
         console.log("User logged in:", userWithoutPassword.username, "isAdmin:", userWithoutPassword.isAdmin);
         return res.json({
           ...userWithoutPassword,
