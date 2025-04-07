@@ -110,12 +110,19 @@ export default function AdminMarketManagement() {
     retry: false,
   });
   
-  // Update market mutation
+  // Create/Update market mutation
   const updateMarketMutation = useMutation({
     mutationFn: async (marketData: Partial<Market>) => {
       const { id, ...rest } = marketData;
-      const res = await apiRequest("PATCH", `/api/admin/markets/${id}`, rest);
-      return res.json();
+      if (!id) {
+        // Create new market
+        const res = await apiRequest("POST", "/api/admin/markets", rest);
+        return res.json();
+      } else {
+        // Update existing market
+        const res = await apiRequest("PATCH", `/api/admin/markets/${id}`, rest);
+        return res.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/markets"] });
@@ -298,8 +305,31 @@ export default function AdminMarketManagement() {
         <TabsContent value="markets">
           <Card>
             <CardHeader>
-              <CardTitle>Satta Matka Markets</CardTitle>
-              <CardDescription>Manage game markets and their timings</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Satta Matka Markets</CardTitle>
+                  <CardDescription>Manage game markets and their timings</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setSelectedMarket(null);
+                    setMarketFormData({
+                      id: "",
+                      name: "",
+                      displayName: "",
+                      description: "",
+                      openTime: "09:00",
+                      closeTime: "17:00",
+                      resultTime: "17:30",
+                      color: "#6366f1",
+                    });
+                    setIsEditMarketOpen(true);
+                  }}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New Market
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoadingMarkets ? (
