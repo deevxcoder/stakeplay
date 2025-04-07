@@ -50,6 +50,8 @@ export default function AdminUserManagement() {
     balance: 0,
     isActive: true,
     isAdmin: false,
+    transactionType: null, // Added for transaction type
+    amount: 0, // Added for transaction amount
   });
 
   const queryClient = useQueryClient();
@@ -150,11 +152,13 @@ export default function AdminUserManagement() {
       balance: user.balance,
       isActive: user.isActive !== false,
       isAdmin: user.isAdmin === true,
+      transactionType: null, //reset transaction type
+      amount: 0, //reset amount
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { //updated type
     const { name, value, type } = e.target;
     setEditFormData({
       ...editFormData,
@@ -165,10 +169,21 @@ export default function AdminUserManagement() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
-      editUserMutation.mutate({
-        id: editingUser.id,
-        ...editFormData,
-      });
+      if(editFormData.transactionType){
+        const updatedBalance = editFormData.transactionType === 'deposit' ? 
+          editingUser.balance + editFormData.amount : editingUser.balance - editFormData.amount;
+
+        editUserMutation.mutate({
+          id: editingUser.id,
+          ...editFormData,
+          balance: updatedBalance,
+        });
+      } else {
+        editUserMutation.mutate({
+          id: editingUser.id,
+          ...editFormData,
+        });
+      }
     }
   };
 
@@ -373,19 +388,71 @@ export default function AdminUserManagement() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="transactionType" className="text-right">
+                  Transaction Type
+                </Label>
+                <Select
+                  name="transactionType"
+                  value={editFormData.transactionType}
+                  onValueChange={handleFormChange}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select transaction type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="deposit">Deposit</SelectItem>
+                    <SelectItem value="withdraw">Withdraw</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={editUserMutation.isPending}>
-                {editUserMutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </DialogFooter>
+            {editFormData.transactionType ? (
+              <>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="amount" className="text-right">
+                      Amount
+                    </Label>
+                    <Input
+                      id="amount"
+                      name="amount"
+                      type="number"
+                      min="0"
+                      value={editFormData.amount}
+                      onChange={handleFormChange}
+                      className="col-span-3"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={editUserMutation.isPending}>
+                    {editUserMutation.isPending ? "Processing..." : 
+                     editFormData.transactionType === "deposit" ? "Deposit" : "Withdraw"}
+                  </Button>
+                </DialogFooter>
+              </>
+            ) : (
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={editUserMutation.isPending}>
+                  {editUserMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            )}
           </form>
         </DialogContent>
       </Dialog>
