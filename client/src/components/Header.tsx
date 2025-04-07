@@ -109,9 +109,15 @@ const Header: React.FC = () => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                  {user.username}
+                  {user.username} {user.isAdmin && <span className="text-primary">(Admin)</span>}
                 </div>
                 <DropdownMenuSeparator />
+                {user.isAdmin && (
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/admin")}>
+                    <Shield className="mr-2 h-4 w-4 text-primary" />
+                    <span>Admin Dashboard</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
