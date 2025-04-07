@@ -177,8 +177,15 @@ export default function AdminUserManagement() {
         editUserMutation.mutate({
           id: editingUser.id,
           balance: updatedBalance,
-          isActive: editFormData.isActive,
-          isAdmin: editFormData.isAdmin,
+          isActive: editFormData.isActive === true || editFormData.isActive === 'true',
+          isAdmin: editFormData.isAdmin === true || editFormData.isAdmin === 'true',
+        });
+        
+        // Reset transaction fields
+        setEditFormData({
+          ...editFormData,
+          transactionType: null,
+          amount: 0
         });
       } else {
         editUserMutation.mutate({
