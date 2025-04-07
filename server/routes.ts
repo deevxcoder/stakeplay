@@ -838,8 +838,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users  
   app.get("/api/admin/users", ensureAdmin, async (req, res) => {
     try {
-      const users = await db.select().from(users);
-      return res.json(users);
+      const allUsers = await storage.getAllUsers();
+      // Don't send passwords in response
+      const sanitizedUsers = allUsers.map(({ password, ...user }) => user);
+      return res.json(sanitizedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       return res.status(500).json({ message: "Internal server error" });

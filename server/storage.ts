@@ -20,6 +20,7 @@ export interface IStorage {
   verifyPassword(userId: number, password: string): Promise<boolean>;
   updatePassword(userId: number, newPassword: string): Promise<User | undefined>;
   makeUserAdmin(username: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>; // Added getAllUsers function
 
   // Bet operations
   createBet(bet: InsertBet): Promise<Bet>;
@@ -185,6 +186,10 @@ export class MemStorage implements IStorage {
     const result = updatedUser[0];
     console.log(`Made user ${username} admin. isAdmin:`, result.isAdmin);
     return result;
+  }
+
+  async getAllUsers(): Promise<User[]> { // Added getAllUsers function
+    return await db.select().from(users);
   }
 
   // Market operations
