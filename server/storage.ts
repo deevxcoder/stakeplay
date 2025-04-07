@@ -204,7 +204,7 @@ export class MemStorage implements IStorage {
       id,
       name: marketData.displayName,
       displayName: marketData.displayName,
-      description: marketData.description || "",
+      description: marketData.description,
       openTime: marketData.openTime,
       closeTime: marketData.closeTime,
       resultTime: marketData.resultTime,
@@ -212,14 +212,13 @@ export class MemStorage implements IStorage {
       color: marketData.color || "#FF5733",
       startDate: marketData.startDate,
       endDate: marketData.endDate,
-      allowedBetTypes: Array.isArray(marketData.allowedBetTypes) ? marketData.allowedBetTypes : JSON.parse(marketData.allowedBetTypes || '[]'),
+      allowedBetTypes: marketData.allowedBetTypes || [],
       coverImage: marketData.coverImage || "",
       createdAt: now,
-      updatedAt: now,
-      latestResult: null
+      updatedAt: now
     };
     
-    this.markets.set(id, market);
+    this.markets.set(market.id, market);
     return market;
   }
 
