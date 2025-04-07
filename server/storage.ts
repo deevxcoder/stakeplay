@@ -105,18 +105,16 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(
-      eq(users.username.toLowerCase(), username.toLowerCase())
-    );
+    const result = await db.select().from(users).where(eq(users.username, username.toLowerCase()));
     return result[0];
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const userToCreate = {
-      ...insertUser,
-      isAdmin: insertUser.isAdmin === true || insertUser.isAdmin === "true"
+  async createUser(user: InsertUser): Promise<User> {
+    const userWithLowerCase = {
+      ...user,
+      username: user.username.toLowerCase()
     };
-    const result = await db.insert(users).values(userToCreate).returning();
+    const result = await db.insert(users).values(userWithLowerCase).returning();
     return result[0];
   }
 
