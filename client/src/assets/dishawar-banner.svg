@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="700" height="200" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4568dc" />
+      <stop offset="100%" stop-color="#2b5876" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="200" fill="url(#bg-gradient)" />
+  
+  <!-- Dishawar Skyline Silhouette -->
+  <path d="M0,140 L30,130 L40,145 L60,135 L70,145 L90,130 L110,140 L130,120 L150,135 L170,110 
+           L180,120 L200,100 L220,115 L240,90 L250,100 L270,80 L290,95 L310,75 L330,85 L350,65 
+           L370,75 L390,60 L410,70 L430,55 L450,65 L470,45 L490,60 L510,40 L530,50 L550,40 
+           L570,50 L590,35 L610,45 L630,30 L650,45 L670,35 L690,45 L700,30 L700,200 L0,200 Z" 
+           fill="#1a416b" />
+    
+  <!-- Fortress/Temple Structure -->
+  <path d="M280,90 L420,90 L420,150 L280,150 Z" fill="#5d83b3" />
+  <path d="M290,100 L310,100 L310,150 L290,150 Z" fill="#2c4f82" />
+  <path d="M330,100 L350,100 L350,150 L330,150 Z" fill="#2c4f82" />
+  <path d="M370,100 L390,100 L390,150 L370,150 Z" fill="#2c4f82" />
+  <path d="M280,80 L420,80 L410,65 L290,65 Z" fill="#5d83b3" />
+  <circle cx="350" cy="110" r="15" fill="#1a416b" />
+  
+  <!-- Market Name with Glow -->
+  <text x="350" y="50" font-family="Arial" font-size="36" font-weight="bold" text-anchor="middle" fill="white" 
+        stroke="rgba(0,0,0,0.3)" stroke-width="2">DISHAWAR MARKET</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="150" cy="40" r="15" fill="rgba(255,255,255,0.2)" />
+  <circle cx="550" cy="40" r="15" fill="rgba(255,255,255,0.2)" />
+  <circle cx="650" cy="30" r="8" fill="rgba(255,255,255,0.15)" />
+  <circle cx="50" cy="30" r="8" fill="rgba(255,255,255,0.15)" />
+  
+  <!-- Subtle Patterns -->
+  <path d="M0,100 Q100,120 200,100 T400,100 T600,100 T700,100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="20" />
+</svg>

@@ -70,19 +70,22 @@ const BetTypeSelection: React.FC<BetTypeSelectionProps> = ({ market, onSelectBet
 
   return (
     <div className="mt-6">
-      <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-white/70 hover:text-white mr-2"
-          onClick={onGoBack}
-        >
-          <ArrowLeftCircle className="h-4 w-4 mr-1" />
-          Back to Markets
-        </Button>
-        <h2 className="text-xl font-semibold">
-          <span className="text-primary">{formatMarketName(market)}</span> - Select Bet Type
+      <div className="mb-6">
+        <div className="flex items-center mb-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-white/70 hover:text-white"
+            onClick={onGoBack}
+          >
+            <ArrowLeftCircle className="h-4 w-4 mr-1" />
+            Back to Markets
+          </Button>
+        </div>
+        <h2 className="text-2xl font-bold">
+          <span className="bg-gradient-to-r from-blue-400 to-primary bg-clip-text text-transparent">{formatMarketName(market)} Market</span>
         </h2>
+        <p className="text-white/70 mt-1">Select your betting type from the options below</p>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="700" height="200" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2e8b57" />
+      <stop offset="100%" stop-color="#3cb371" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="200" fill="url(#bg-gradient)" />
+  
+  <!-- Delhi Skyline Silhouette -->
+  <path d="M0,140 L30,145 L60,142 L90,150 L110,145 L130,153 L150,147 L160,147 L170,130 L180,147 
+           L190,145 L200,130 L220,135 L235,120 L240,125 L250,110 L260,105 L270,110 L280,140
+           L290,138 L300,145 L310,135 L325,125 L330,125 L340,105 L350,110 L360,105 L375,95
+           L380,100 L390,80 L400,90 L410,80 L420,85 L430,70 L440,75 L450,70 L460,75 L470,65
+           L480,70 L490,60 L500,65 L510,60 L520,65 L530,55 L540,60 L550,50 L560,55 L570,45
+           L580,55 L590,50 L600,55 L620,50 L640,55 L660,45 L680,50 L700,45 L700,200 L0,200 Z" 
+           fill="#1a6e3a" />
+    
+  <!-- Delhi India Gate -->
+  <rect x="320" y="80" width="60" height="60" rx="5" fill="#e5a63e" />
+  <rect x="330" y="90" width="40" height="50" rx="3" fill="#994a16" />
+  
+  <!-- Market Name with Glow -->
+  <text x="350" y="50" font-family="Arial" font-size="36" font-weight="bold" text-anchor="middle" fill="white" 
+        stroke="rgba(0,0,0,0.3)" stroke-width="2">GALI MARKET</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="150" cy="40" r="15" fill="rgba(255,255,255,0.2)" />
+  <circle cx="550" cy="40" r="15" fill="rgba(255,255,255,0.2)" />
+  <circle cx="650" cy="30" r="8" fill="rgba(255,255,255,0.15)" />
+  <circle cx="50" cy="30" r="8" fill="rgba(255,255,255,0.15)" />
+  
+  <!-- Subtle Patterns -->
+  <path d="M0,100 Q100,120 200,100 T400,100 T600,100 T700,100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="20" />
+</svg>

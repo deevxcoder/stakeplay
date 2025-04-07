@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="700" height="200" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c94b4b" />
+      <stop offset="100%" stop-color="#e2703a" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="700" height="200" fill="url(#bg-gradient)" />
+  
+  <!-- Mumbai Skyline Silhouette -->
+  <path d="M0,140 L30,150 L40,135 L50,140 L75,120 L85,135 L100,130 L110,110 L120,118 L140,90 
+           L150,100 L170,85 L180,95 L200,80 L210,90 L230,75 L250,85 L275,70 L290,70 L300,50 
+           L310,60 L330,40 L340,50 L350,30 L360,40 L390,30 L410,40 L430,30 L460,40 L480,30 
+           L490,35 L510,25 L530,35 L550,25 L570,35 L590,25 L610,35 L630,25 L650,35 L670,25 
+           L700,40 L700,200 L0,200 Z" 
+           fill="#a93e28" />
+    
+  <!-- Gateway of India -->
+  <path d="M310,70 L350,70 L350,150 L310,150 Z" fill="#e5a63e" />
+  <path d="M320,80 L340,80 L340,150 L320,150 Z" fill="#994a16" />
+  <path d="M310,60 L350,60 L340,50 L320,50 Z" fill="#e5a63e" />
+  
+  <!-- Market Name with Glow -->
+  <text x="350" y="50" font-family="Arial" font-size="36" font-weight="bold" text-anchor="middle" fill="white" 
+        stroke="rgba(0,0,0,0.3)" stroke-width="2">MUMBAI MARKET</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="150" cy="40" r="15" fill="rgba(255,255,255,0.2)" />
+  <circle cx="550" cy="40" r="15" fill="rgba(255,255,255,0.2)" />
+  <circle cx="650" cy="30" r="8" fill="rgba(255,255,255,0.15)" />
+  <circle cx="50" cy="30" r="8" fill="rgba(255,255,255,0.15)" />
+  
+  <!-- Subtle Patterns -->
+  <path d="M0,100 Q100,120 200,100 T400,100 T600,100 T700,100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="20" />
+</svg>

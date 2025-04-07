@@ -3,6 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, ArrowLeftCircle, ArrowRightCircle, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Import market banner images
+import galiMarketBanner from "../assets/gali-banner.svg";
+import mumbaiMarketBanner from "../assets/mumbai-banner.svg";
+import dishawarMarketBanner from "../assets/dishawar-banner.svg";
+
 export type MarketType = "gali" | "dishawar" | "mumbai";
 
 // Interface for market details
@@ -23,6 +28,13 @@ interface MatkaMarketsProps {
 }
 
 const MatkaMarkets: React.FC<MatkaMarketsProps> = ({ onSelectMarket, onGoBack }) => {
+  // Market banner mapping
+  const marketBanners = {
+    gali: galiMarketBanner,
+    dishawar: dishawarMarketBanner,
+    mumbai: mumbaiMarketBanner
+  };
+
   // Mock markets data (in a real app, this would come from an API)
   const [markets] = useState<Market[]>([
     {
@@ -87,17 +99,22 @@ const MatkaMarkets: React.FC<MatkaMarketsProps> = ({ onSelectMarket, onGoBack })
 
   return (
     <div className="mt-6">
-      <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-white/70 hover:text-white mr-2"
-          onClick={onGoBack}
-        >
-          <ArrowLeftCircle className="h-4 w-4 mr-1" />
-          Back to Games
-        </Button>
-        <h2 className="text-xl font-semibold">Satta Matka Markets</h2>
+      <div className="mb-6">
+        <div className="flex items-center mb-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-white/70 hover:text-white"
+            onClick={onGoBack}
+          >
+            <ArrowLeftCircle className="h-4 w-4 mr-1" />
+            Back to Games
+          </Button>
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
+          Satta Matka Markets
+        </h2>
+        <p className="text-white/70 mt-1">Select a market to place your bet</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -108,8 +125,15 @@ const MatkaMarkets: React.FC<MatkaMarketsProps> = ({ onSelectMarket, onGoBack })
             style={{ boxShadow: "0 4px 30px rgba(0, 0, 0, 0.3)" }}
             onClick={() => onSelectMarket(market.id)}
           >
-            <div className={`h-24 bg-gradient-to-br ${market.color} flex items-center justify-center relative`}>
-              <h3 className="text-2xl font-bold text-white">{market.name}</h3>
+            <div className="h-40 relative overflow-hidden">
+              <img 
+                src={marketBanners[market.id]} 
+                alt={`${market.name} Banner`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center">
+                <h3 className="text-2xl font-bold text-white drop-shadow-lg">{market.name}</h3>
+              </div>
               <div className="absolute top-2 right-2">
                 {getStatusBadge(market.status)}
               </div>
