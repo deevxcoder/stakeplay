@@ -2,6 +2,8 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/not-found";
+import DemoBanner from "@/components/DemoBanner";
+import { UserProvider } from "@/context/UserContext";
 
 function Router() {
   return (
@@ -14,10 +16,11 @@ function Router() {
 
 function App() {
   return (
-    <>
+    <UserProvider>
       <Router />
+      <DemoBanner />
       <Toaster />
-    </>
+    </UserProvider>
   );
 }
 
