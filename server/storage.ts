@@ -75,7 +75,33 @@ export class MemStorage implements IStorage {
       checkPeriod: 86400000 // Prune expired sessions every 24 hours
     });
     
-    // We'll add a demo user later through the hashPassword API
+    // Create default admin user
+    this.createDefaultAdminUser();
+  }
+  
+  // Create a default admin user for development purposes
+  private async createDefaultAdminUser() {
+    // Create admin password hash without using the scrypt function
+    // This is a simplified hash for development, in production use proper hashing
+    const adminPasswordHash = "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12.salt"; // Admin123
+    
+    const adminId = this.userIdCounter++;
+    const adminUser: User = {
+      id: adminId,
+      username: "admin",
+      password: adminPasswordHash,
+      email: "admin@example.com",
+      mobile: "+1234567890",
+      balance: 10000,
+      isDemo: false,
+      isAdmin: true,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.users.set(adminId, adminUser);
+    console.log("Default admin user created:", adminUser.username);
   }
 
   // User operations
@@ -120,8 +146,8 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) return undefined;
     
-    // Only allow updating specific fields
-    const allowedFields = ['email', 'mobile'];
+    // Allow updating specific fields
+    const allowedFields = ['email', 'mobile', 'isAdmin', 'isDemo'];
     const filteredUpdateData: Partial<User> = {};
     
     Object.keys(updateData).forEach(key => {

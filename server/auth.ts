@@ -19,10 +19,22 @@ async function hashPassword(password: string) {
 
 // Password comparison function
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  // For the default admin account with simplified password
+  if (stored === "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12.salt") {
+    // Special handling for admin123 simple hash
+    return supplied === "admin123";
+  }
+
+  // Normal password comparison with scrypt
+  try {
+    const [hashed, salt] = stored.split(".");
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error("Password comparison error:", error);
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
@@ -168,9 +180,9 @@ export function setupAuth(app: Express) {
           isAdmin: false 
         };
         
-        // Update user in storage
-        storage.users.set(demoUser.id, updatedUser);
-        demoUser = updatedUser;
+        // Update user by calling updateUser method
+        const updatedDemoUser = await storage.updateUser(demoUser.id, updatedUser);
+        demoUser = updatedDemoUser || demoUser;
       }
       
       // Log the user in
