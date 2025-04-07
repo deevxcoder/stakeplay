@@ -86,8 +86,6 @@ export default function SettingsPage() {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      
       <div className="flex-1 container py-6 max-w-4xl">
         <div className="flex items-center mb-6">
           <Settings className="h-6 w-6 mr-2" />
