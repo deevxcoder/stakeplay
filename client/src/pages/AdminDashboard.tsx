@@ -136,51 +136,51 @@ export default function AdminDashboard() {
       </div>
 
       {/* Mobile Sidebar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-        <div className="grid grid-cols-5 h-16 px-2">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
+        <div className="grid grid-cols-5 h-16">
           <Button 
             variant={activeTab === "overview" ? "default" : "ghost"} 
-            className="flex flex-col items-center justify-center rounded-none h-full"
+            className={`flex flex-col items-center justify-center rounded-none h-full border-0 ${activeTab === "overview" ? "bg-primary/10 text-primary" : ""}`}
             onClick={() => setActiveTab("overview")}
           >
-            <LayoutDashboard className="h-5 w-5" />
-            <span className="text-xs mt-1">Dashboard</span>
+            <LayoutDashboard className="h-4 w-4 mb-1" />
+            <span className="text-[10px]">Dashboard</span>
           </Button>
 
           <Button 
             variant={activeTab === "users" ? "default" : "ghost"} 
-            className="flex flex-col items-center justify-center rounded-none h-full"
+            className={`flex flex-col items-center justify-center rounded-none h-full border-0 ${activeTab === "users" ? "bg-primary/10 text-primary" : ""}`}
             onClick={() => setActiveTab("users")}
           >
-            <Users className="h-5 w-5" />
-            <span className="text-xs mt-1">Users</span>
+            <Users className="h-4 w-4 mb-1" />
+            <span className="text-[10px]">Users</span>
           </Button>
 
           <Button 
             variant={activeTab === "deposits" ? "default" : "ghost"} 
-            className="flex flex-col items-center justify-center rounded-none h-full"
+            className={`flex flex-col items-center justify-center rounded-none h-full border-0 ${activeTab === "deposits" ? "bg-primary/10 text-primary" : ""}`}
             onClick={() => setActiveTab("deposits")}
           >
-            <DollarSign className="h-5 w-5" />
-            <span className="text-xs mt-1">Deposits</span>
+            <DollarSign className="h-4 w-4 mb-1" />
+            <span className="text-[10px]">Deposits</span>
           </Button>
 
           <Button 
             variant={activeTab === "withdrawals" ? "default" : "ghost"} 
-            className="flex flex-col items-center justify-center rounded-none h-full"
+            className={`flex flex-col items-center justify-center rounded-none h-full border-0 ${activeTab === "withdrawals" ? "bg-primary/10 text-primary" : ""}`}
             onClick={() => setActiveTab("withdrawals")}
           >
-            <CreditCard className="h-5 w-5" />
-            <span className="text-xs mt-1">Withdraw</span>
+            <CreditCard className="h-4 w-4 mb-1" />
+            <span className="text-[10px]">Withdraw</span>
           </Button>
 
           <Button 
             variant={activeTab === "markets" ? "default" : "ghost"} 
-            className="flex flex-col items-center justify-center rounded-none h-full"
+            className={`flex flex-col items-center justify-center rounded-none h-full border-0 ${activeTab === "markets" ? "bg-primary/10 text-primary" : ""}`}
             onClick={() => setActiveTab("markets")}
           >
-            <Calendar className="h-5 w-5" />
-            <span className="text-xs mt-1">Markets</span>
+            <Calendar className="h-4 w-4 mb-1" />
+            <span className="text-[10px]">Markets</span>
           </Button>
         </div>
       </div>
