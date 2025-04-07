@@ -582,9 +582,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all markets
   app.get("/api/admin/markets", ensureAdmin, async (req, res) => {
     try {
-      // This route would retrieve all markets for admin management
-      // In a real implementation, this would come from the database
-      const markets = [
+      const markets = await storage.getAllMarkets();
+      return res.json(markets || [
         {
           id: "gali",
           name: "Gali Market",
