@@ -132,24 +132,28 @@ export function setupAuth(app: Express) {
 
   // Login route
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: User | false, info: { message?: string }) => {
+    passport.authenticate("local", async (err: any, user: User | false, info: { message?: string }) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info.message || "Authentication failed" });
       
-      req.login(user, async (err) => {
-        if (err) return next(err);
-        
-        // Check admin status from storage
-        const userWithAdminStatus = await storage.getUserByUsername(user.username);
-        
-        // Return user data without password
-        const { password, ...userWithoutPassword } = userWithAdminStatus;
-        console.log("User logged in:", userWithoutPassword.username, "isAdmin:", userWithoutPassword.isAdmin);
-        return res.json({
-          ...userWithoutPassword,
-          isAdmin: Boolean(userWithoutPassword.isAdmin)
+      try {
+        // Get fresh user data from database to ensure correct admin status
+        const dbUser = await storage.getUserByUsername(user.username);
+        if (!dbUser) {
+          return res.status(401).json({ message: "User not found" });
+        }
+
+        req.login(dbUser, (err) => {
+          if (err) return next(err);
+          
+          // Return user data without password
+          const { password, ...userWithoutPassword } = dbUser;
+          console.log("User logged in:", userWithoutPassword.username, "isAdmin:", userWithoutPassword.isAdmin);
+          return res.json(userWithoutPassword);
         });
-      });
+      } catch (error) {
+        return next(error);
+      }
     })(req, res, next);
   });
 
