@@ -33,23 +33,20 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-surface shadow-lg border-b border-white/10 sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center">
-          <h1 className="text-2xl font-bold text-white mr-3 flex items-center">
-            <Sparkles className="h-6 w-6 text-amber-400 mr-2" />
+      <div className="w-full px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
+        {/* Logo and Brand */}
+        <div className="flex items-center shrink-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mr-2 flex items-center">
+            <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400 mr-1 sm:mr-2" />
             <span className="bg-gradient-to-r from-amber-400 via-emerald-400 to-primary bg-clip-text text-transparent">
               StakePlay
             </span>
           </h1>
-          {user && (
-            <Badge variant="outline" className="bg-orange-600/20 text-orange-400 border-orange-500/30 text-xs">
-              DEMO MODE
-            </Badge>
-          )}
         </div>
 
-        <div className="flex items-center space-x-4">
-          {/* Demo Mode Badge - Always visible but clickable when not logged in */}
+        {/* User Actions and Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Demo Mode Badge */}
           {!user ? (
             <Badge 
               variant="outline" 
@@ -60,18 +57,23 @@ const Header: React.FC = () => {
             </Badge>
           ) : (
             <>
+              {/* Demo Badge when logged in */}
+              <Badge variant="outline" className="bg-orange-600/20 text-orange-400 border-orange-500/30 text-xs hidden sm:flex">
+                DEMO MODE
+              </Badge>
+            
               {/* Virtual Currency Balance */}
               <div 
-                className="bg-surface-light rounded-full px-4 py-2 flex items-center border border-white/5 shadow-lg"
+                className="bg-surface-light rounded-full px-2 sm:px-4 py-1.5 sm:py-2 flex items-center border border-white/5 shadow-lg"
                 style={{
                   boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)"
                 }}
               >
-                <Coins className="text-amber-400 mr-2 h-5 w-5" />
+                <Coins className="text-amber-400 mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 {isLoading ? (
-                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-5 w-14 sm:h-6 sm:w-16" />
                 ) : (
-                  <span className="font-bold text-white">
+                  <span className="font-bold text-white text-sm sm:text-base">
                     {user?.balance.toLocaleString() || 0}
                   </span>
                 )}
@@ -84,9 +86,9 @@ const Header: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
-                  className="bg-surface-light hover:bg-surface-light/80 p-0 h-10 w-10 rounded-full border border-white/10"
+                  className="bg-surface-light hover:bg-surface-light/80 p-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-white/10"
                 >
-                  <UserPlus className="h-5 w-5 text-primary" />
+                  <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -105,19 +107,21 @@ const Header: React.FC = () => {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/80 p-0 h-10 px-3 rounded-full border border-primary/20 flex items-center gap-1">
-                  <Avatar className="h-8 w-8">
+                <Button className="bg-primary hover:bg-primary/80 h-8 sm:h-10 rounded-full border border-primary/20 flex items-center px-2">
+                  <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
                     <AvatarImage src="" />
                     <AvatarFallback className="bg-primary-foreground text-primary">
-                      <UserCircle className="h-6 w-6" />
+                      <UserCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium ml-1 hidden sm:inline-block">{user.username}</span>
-                  <ChevronDown className="h-4 w-4 text-primary-foreground/70" />
+                  <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground/70 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  {user.username}
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer">
                   <History className="mr-2 h-4 w-4" />
