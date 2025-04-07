@@ -10,9 +10,6 @@ type AdminProtectedRouteProps = {
 export function AdminProtectedRoute({ path, component: Component }: AdminProtectedRouteProps) {
   const { user, isLoading } = useAuth();
 
-  // Log what we have for debugging
-  console.log("AdminProtectedRoute - user:", user);
-
   if (isLoading) {
     return (
       <Route path={path}>

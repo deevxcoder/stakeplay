@@ -50,17 +50,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
+      // Login the user
       const res = await apiRequest("POST", "/api/login", credentials);
       const userData = await res.json();
       
-      // Check admin status
-      const adminCheck = await apiRequest("GET", "/api/check-admin");
-      const adminStatus = await adminCheck.json();
+      // Check admin status if login successful
+      if (userData && !userData.error) {
+        const adminCheck = await apiRequest("GET", "/api/check-admin");
+        const adminStatus = await adminCheck.json();
+        
+        return {
+          ...userData,
+          isAdmin: adminStatus.isAdmin,
+          balance: userData.balance || 0
+        };
+      }
       
-      return {
-        ...userData,
-        isAdmin: adminStatus.isAdmin
-      };
+      throw new Error(userData.error || "Login failed");
     },
     onSuccess: (user: UserWithoutPassword) => {
       queryClient.setQueryData(["/api/user"], user);
