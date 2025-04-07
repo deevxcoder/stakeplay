@@ -231,7 +231,7 @@ export default function AdminMarketManagement() {
   // Handle market form submit
   const handleMarketFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!marketFormData.displayName || !marketFormData.startDate || !marketFormData.endDate || 
         !marketFormData.openTime || !marketFormData.closeTime || !marketFormData.resultTime ||
@@ -601,7 +601,7 @@ export default function AdminMarketManagement() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar
+                      <DateCalendar
                         mode="single"
                         selected={new Date(marketFormData.startDate)}
                         onSelect={(date) => setMarketFormData(prev => ({
@@ -646,7 +646,7 @@ export default function AdminMarketManagement() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar
+                      <DateCalendar
                         mode="single"
                         selected={new Date(marketFormData.endDate)}
                         onSelect={(date) => setMarketFormData(prev => ({
@@ -691,7 +691,7 @@ export default function AdminMarketManagement() {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar
+                      <DateCalendar
                         mode="single"
                         selected={marketFormData.resultDate ? new Date(marketFormData.resultDate) : new Date(marketFormData.endDate)}
                         onSelect={(date) => setMarketFormData(prev => ({
