@@ -34,15 +34,15 @@ const ensureAdmin = (req: Request, res: Response, next: Function) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Not authenticated" });
   }
-  
+
   const user = req.user as User;
   const isAdmin = user.isAdmin === true || user.isAdmin === "true";
-  
+
   if (!isAdmin) {
     console.log("Admin access denied for user:", user.username);
     return res.status(403).json({ message: "Admin access denied" });
   }
-  
+
   console.log("Admin access granted for user:", user.username);
   next();
 };
@@ -907,8 +907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       return res.status(201).json(newMarket);
     } catch (error) {
-      console.error("Error creating market:", error);
-      return res.status(500).json({ message: "Internal server error" });
+      console.error("Error creating market:", error);      return res.status(500).json({ message: "Internal server error" });
     }
   });
 
