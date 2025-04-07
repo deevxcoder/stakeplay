@@ -24,7 +24,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -36,7 +35,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Trash, Ban, CheckCircle } from "lucide-react";
+import { Edit, Ban, CheckCircle } from "lucide-react";
 import type { User } from "@shared/schema";
 
 export default function AdminUserManagement() {
@@ -52,16 +51,19 @@ export default function AdminUserManagement() {
     isActive: true,
     isAdmin: false,
   });
-  
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   // Fetch all users
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
-    retry: false,
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/users");
+      return response.json();
+    }
   });
-  
+
   // Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: { username: string; email: string; password: string; isAdmin: boolean }) => {
@@ -108,7 +110,7 @@ export default function AdminUserManagement() {
       });
     },
   });
-  
+
   // Ban/Unban user mutation
   const toggleUserStatusMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
@@ -130,28 +132,28 @@ export default function AdminUserManagement() {
       });
     },
   });
-  
+
   // Filter users based on search term
   const filteredUsers = users.filter(
     (user) =>
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.mobile && user.mobile.includes(searchTerm))
   );
-  
+
   const handleEditClick = (user: User) => {
     setEditingUser(user);
     setEditFormData({
       username: user.username,
-      email: user.email,
+      email: user.email || "",
       mobile: user.mobile || "",
       balance: user.balance,
-      isActive: user.isActive !== false, // Default to true if undefined
-      isAdmin: user.isAdmin === true, // Default to false if undefined
+      isActive: user.isActive !== false,
+      isAdmin: user.isAdmin === true,
     });
     setIsEditDialogOpen(true);
   };
-  
+
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     setEditFormData({
@@ -159,7 +161,7 @@ export default function AdminUserManagement() {
       [name]: type === "number" ? parseFloat(value) : value,
     });
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
@@ -169,14 +171,14 @@ export default function AdminUserManagement() {
       });
     }
   };
-  
+
   const toggleUserStatus = (user: User) => {
     toggleUserStatusMutation.mutate({
       id: user.id,
       isActive: !(user.isActive),
     });
   };
-  
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -187,26 +189,18 @@ export default function AdminUserManagement() {
       minute: "2-digit",
     }).format(date);
   };
-  
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-  
+
   return (
     <div>
       <Card>
         <CardHeader>
           <CardTitle>User Management</CardTitle>
-          <CardDescription>Manage user accounts, balance, and permissions</CardDescription>
+          <CardDescription>Manage user accounts and permissions</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex justify-between mb-4">
             <Input
-              placeholder="Search users by name, email or mobile..."
+              placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
@@ -215,7 +209,7 @@ export default function AdminUserManagement() {
               Add User
             </Button>
           </div>
-          
+
           {isLoading ? (
             <div className="text-center py-4">Loading users...</div>
           ) : (
@@ -223,10 +217,8 @@ export default function AdminUserManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
                     <TableHead>Username</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
                     <TableHead>Balance</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Role</TableHead>
@@ -237,18 +229,16 @@ export default function AdminUserManagement() {
                 <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center">
+                      <TableCell colSpan={7} className="text-center">
                         No users found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell>{user.id}</TableCell>
                         <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.mobile || "-"}</TableCell>
-                        <TableCell>{formatCurrency(user.balance)}</TableCell>
+                        <TableCell>{user.email || "-"}</TableCell>
+                        <TableCell>₹{user.balance}</TableCell>
                         <TableCell>
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -277,20 +267,8 @@ export default function AdminUserManagement() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEditClick(user)}
-                            className="mr-1"
                           >
                             <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => toggleUserStatus(user)}
-                          >
-                            {user.isActive !== false ? (
-                              <Ban className="h-4 w-4 text-red-500" />
-                            ) : (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
-                            )}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -302,7 +280,7 @@ export default function AdminUserManagement() {
           )}
         </CardContent>
       </Card>
-      
+
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -334,18 +312,6 @@ export default function AdminUserManagement() {
                   id="email"
                   name="email"
                   value={editFormData.email}
-                  onChange={handleFormChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="mobile" className="text-right">
-                  Mobile
-                </Label>
-                <Input
-                  id="mobile"
-                  name="mobile"
-                  value={editFormData.mobile}
                   onChange={handleFormChange}
                   className="col-span-3"
                 />
@@ -481,7 +447,7 @@ export default function AdminUserManagement() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="isAdmin" className="text-right">
-                  Admin
+                  Role
                 </Label>
                 <Select name="isAdmin" defaultValue="false">
                   <SelectTrigger className="col-span-3">
