@@ -199,12 +199,23 @@ export class MemStorage implements IStorage {
 
   async createMarket(marketData: any): Promise<Market> {
     const now = new Date();
+    const id = marketData.displayName.toLowerCase().replace(/\s+/g, '-');
     const market = {
-      ...marketData,
-      id: marketData.name.toLowerCase().replace(/\s+/g, '-'),
+      id,
+      name: marketData.displayName,
+      displayName: marketData.displayName,
+      description: marketData.description,
+      openTime: marketData.openTime,
+      closeTime: marketData.closeTime,
+      resultTime: marketData.resultTime,
+      status: "open",
+      color: marketData.color || "#FF5733",
+      startDate: marketData.startDate,
+      endDate: marketData.endDate,
+      allowedBetTypes: marketData.allowedBetTypes || [],
+      coverImage: marketData.coverImage || "",
       createdAt: now,
-      updatedAt: now,
-      status: "open"
+      updatedAt: now
     };
     
     this.markets.set(market.id, market);
