@@ -814,9 +814,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username,
         email,
         password,
-        isAdmin: isAdmin === "true"
+        isAdmin: isAdmin === true || isAdmin === "true"
       });
-      
+
       const { password: _, ...userWithoutPassword } = user;
       return res.status(201).json(userWithoutPassword);
     } catch (error) {
