@@ -52,6 +52,13 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { format, parse, addMonths } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Market {
   id: string;
@@ -576,6 +583,38 @@ export default function AdminMarketManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startDate" className="text-right">
+                  Open Date
+                </Label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !marketFormData.startDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {marketFormData.startDate ? format(new Date(marketFormData.startDate), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={new Date(marketFormData.startDate)}
+                        onSelect={(date) => setMarketFormData(prev => ({
+                          ...prev,
+                          startDate: date ? format(date, 'yyyy-MM-dd') : prev.startDate
+                        }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="openTime" className="text-right">
                   Open Time
                 </Label>
@@ -589,6 +628,38 @@ export default function AdminMarketManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="endDate" className="text-right">
+                  Close Date
+                </Label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !marketFormData.endDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {marketFormData.endDate ? format(new Date(marketFormData.endDate), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={new Date(marketFormData.endDate)}
+                        onSelect={(date) => setMarketFormData(prev => ({
+                          ...prev,
+                          endDate: date ? format(date, 'yyyy-MM-dd') : prev.endDate
+                        }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="closeTime" className="text-right">
                   Close Time
                 </Label>
@@ -600,6 +671,38 @@ export default function AdminMarketManagement() {
                   onChange={handleMarketFormChange}
                   className="col-span-3"
                 />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="resultDate" className="text-right">
+                  Result Date
+                </Label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !marketFormData.resultDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {marketFormData.resultDate ? format(new Date(marketFormData.resultDate), "PPP") : <span>Same as Close Date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={marketFormData.resultDate ? new Date(marketFormData.resultDate) : new Date(marketFormData.endDate)}
+                        onSelect={(date) => setMarketFormData(prev => ({
+                          ...prev,
+                          resultDate: date ? format(date, 'yyyy-MM-dd') : prev.resultDate
+                        }))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="resultTime" className="text-right">
