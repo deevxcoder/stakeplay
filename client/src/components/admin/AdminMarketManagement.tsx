@@ -133,11 +133,13 @@ export default function AdminMarketManagement() {
       if (!id) {
         // Create new market
         const res = await apiRequest("POST", "/api/admin/markets", rest);
-        return res.json();
+        const data = await res.json();
+        return data;
       } else {
         // Update existing market
         const res = await apiRequest("PATCH", `/api/admin/markets/${id}`, rest);
-        return res.json();
+        const data = await res.json();
+        return data;
       }
     },
     onSuccess: () => {
@@ -147,6 +149,8 @@ export default function AdminMarketManagement() {
         description: "Market information has been updated successfully.",
       });
       setIsEditMarketOpen(false);
+      // Force refresh the markets list
+      queryClient.refetchQueries({ queryKey: ["/api/admin/markets"] });
     },
     onError: (error: Error) => {
       toast({
