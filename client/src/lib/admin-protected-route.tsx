@@ -10,6 +10,9 @@ type AdminProtectedRouteProps = {
 export function AdminProtectedRoute({ path, component: Component }: AdminProtectedRouteProps) {
   const { user, isLoading } = useAuth();
 
+  // Log what we have for debugging
+  console.log("AdminProtectedRoute - user:", user);
+
   if (isLoading) {
     return (
       <Route path={path}>
@@ -21,6 +24,7 @@ export function AdminProtectedRoute({ path, component: Component }: AdminProtect
   }
 
   if (!user) {
+    console.log("AdminProtectedRoute - No user, redirecting to /auth");
     return (
       <Route path={path}>
         <Redirect to="/auth" />
@@ -28,7 +32,9 @@ export function AdminProtectedRoute({ path, component: Component }: AdminProtect
     );
   }
 
+  // If user is available, just check the isAdmin flag
   if (!user.isAdmin) {
+    console.log("AdminProtectedRoute - Not admin, redirecting to /");
     return (
       <Route path={path}>
         <Redirect to="/" />
@@ -36,5 +42,6 @@ export function AdminProtectedRoute({ path, component: Component }: AdminProtect
     );
   }
 
+  console.log("AdminProtectedRoute - Admin confirmed, rendering component");
   return <Route path={path} component={Component} />;
 }

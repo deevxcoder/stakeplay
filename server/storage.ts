@@ -100,7 +100,7 @@ export class MemStorage implements IStorage {
     };
     
     this.users.set(adminId, adminUser);
-    console.log("Default admin user created:", adminUser.username);
+    console.log("Default admin user created:", adminUser.username, "isAdmin:", adminUser.isAdmin);
   }
 
   // User operations

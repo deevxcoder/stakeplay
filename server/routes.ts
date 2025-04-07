@@ -86,6 +86,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Check admin status
+  app.get("/api/check-admin", ensureAuthenticated, (req, res) => {
+    const isAdmin = (req.user as User).isAdmin === true;
+    console.log(`User ${(req.user as User).username} checked admin status. isAdmin:`, isAdmin);
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).send(JSON.stringify({ isAdmin }));
+  });
+  
+  // Another admin check with just text response
+  app.get("/api/admin-check-text", ensureAuthenticated, (req, res) => {
+    const isAdmin = (req.user as User).isAdmin === true;
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(200).send(isAdmin ? "true" : "false");
+  });
+  
   // Get user's recent bets
   app.get("/api/user/bets", ensureAuthenticated, async (req, res) => {
     const user = req.user as User;
