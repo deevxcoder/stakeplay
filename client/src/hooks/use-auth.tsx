@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         return {
           ...userData,
-          isAdmin: Boolean(userData.isAdmin),
+          isAdmin: userData.isAdmin === true || userData.isAdmin === "true",
           balance: userData.balance || 0
         };
       } catch (error) {

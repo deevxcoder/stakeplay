@@ -30,7 +30,7 @@ async function seedDatabase() {
         email: "testadmin@example.com",
         mobile: "+9876543210",
         balance: 10000,
-        isAdmin: true
+        isAdmin: "true" // Change to string "true" to match storage expectations
       }
     ];
 
