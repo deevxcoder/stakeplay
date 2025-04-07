@@ -215,11 +215,6 @@ export default function AdminUserManagement() {
               Add User
             </Button>
           </div>
-              placeholder="Search users by name, email or mobile..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
           </div>
           
           {isLoading ? (
