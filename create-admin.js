@@ -18,20 +18,22 @@ async function createAdminUser() {
     console.log('Existing admin user:', adminUser);
     
     if (!adminUser) {
-      // Create a new admin user
+      // Create a new admin user with no initial balance
       const hashedPassword = await hashPassword('admin123');
       adminUser = await storage.createUser({
         username: 'admin',
         password: hashedPassword,
         email: 'admin@example.com',
         mobile: '+1234567890',
+        balance: 0,
+        isAdmin: true
       });
       console.log('Created new admin user:', adminUser);
+    } else {
+      // Update existing user to be admin with no balance override
+      adminUser = await storage.makeUserAdmin(adminUser.username);
+      console.log('Updated admin privileges:', adminUser);
     }
-    
-    // Make the user an admin
-    const updatedUser = await storage.makeUserAdmin('admin');
-    console.log('Updated admin privileges:', updatedUser);
     
     // Verify the user is now an admin
     const verifiedUser = await storage.getUserByUsername('admin');
