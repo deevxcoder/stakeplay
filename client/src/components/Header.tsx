@@ -1,20 +1,34 @@
 import React, { useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Coins, User, Sparkles, LogIn, UserPlus, AlertOctagon } from "lucide-react";
+import { 
+  Coins, Sparkles, AlertOctagon, UserPlus, History, 
+  Settings, LogOut, ChevronDown, UserCircle, User
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const Header: React.FC = () => {
-  const { user, isLoading, loginAsDemo } = useUser();
+  const { user, isLoading, loginAsDemo, logout } = useUser();
   const [demoInfoOpen, setDemoInfoOpen] = useState(false);
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
 
   const handleDemoLogin = () => {
     loginAsDemo();
     setDemoInfoOpen(true);
+  };
+  
+  const handleLogout = () => {
+    if (user && window.confirm("Are you sure you want to log out?")) {
+      logout();
+    }
   };
 
   return (
@@ -35,105 +49,91 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Demo Mode Badge - Always visible but clickable when not logged in */}
           {!user ? (
-            <>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-primary border-primary/20 hover:bg-primary/10"
-                onClick={() => setRegisterDialogOpen(true)}
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Register
-              </Button>
-              
-              <Button 
-                size="sm" 
-                className="bg-gradient-to-r from-amber-500 to-primary hover:opacity-90"
-                onClick={handleDemoLogin}
-              >
-                <LogIn className="h-4 w-4 mr-2" />
-                Try Demo
-              </Button>
-            </>
+            <Badge 
+              variant="outline" 
+              className="bg-amber-600/20 text-amber-400 border-amber-500/30 text-xs cursor-pointer hover:bg-amber-600/30 transition-colors"
+              onClick={handleDemoLogin}
+            >
+              DEMO
+            </Badge>
           ) : (
             <>
               {/* Virtual Currency Balance */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div 
-                    className="bg-surface-light rounded-full px-4 py-2 flex items-center border border-white/5 shadow-lg cursor-pointer hover:bg-surface transition-colors"
-                    style={{
-                      boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)"
-                    }}
-                  >
-                    <Coins className="text-amber-400 mr-2 h-5 w-5" />
-                    {isLoading ? (
-                      <Skeleton className="h-6 w-20" />
-                    ) : (
-                      <span className="font-bold text-white">
-                        {user?.balance.toLocaleString() || 0}
-                      </span>
-                    )}
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">Demo Account Balance</h4>
-                    <p className="text-sm text-muted-foreground">
-                      This is virtual currency for testing purposes only. Create a real account to win real prizes!
-                    </p>
-                    <Button 
-                      className="w-full mt-2"
-                      onClick={() => setRegisterDialogOpen(true)}
-                    >
-                      Create Real Account
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              {/* User Profile Button */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button 
-                    className="bg-primary hover:bg-primary/80 rounded-full p-2.5 transition shadow-lg"
-                    style={{
-                      boxShadow: "0 0 10px rgba(16, 185, 129, 0.3)"
-                    }}
-                  >
-                    <User className="h-5 w-5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <div className="bg-primary/20 p-3 rounded-full mr-3">
-                        <User className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{user.username}</p>
-                        <p className="text-xs text-muted-foreground">Demo Account</p>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                      <div className="flex items-start">
-                        <AlertOctagon className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm">
-                          This is a demo account with limited features. Create a real account to access all features and win prizes!
-                        </p>
-                      </div>
-                    </div>
-                    <Button 
-                      className="w-full" 
-                      onClick={() => setRegisterDialogOpen(true)}
-                    >
-                      Create Real Account
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              <div 
+                className="bg-surface-light rounded-full px-4 py-2 flex items-center border border-white/5 shadow-lg"
+                style={{
+                  boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)"
+                }}
+              >
+                <Coins className="text-amber-400 mr-2 h-5 w-5" />
+                {isLoading ? (
+                  <Skeleton className="h-6 w-20" />
+                ) : (
+                  <span className="font-bold text-white">
+                    {user?.balance.toLocaleString() || 0}
+                  </span>
+                )}
+              </div>
             </>
+          )}
+
+          {/* User Avatar - Different states based on login status */}
+          {!user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  className="bg-surface-light hover:bg-surface-light/80 p-0 h-10 w-10 rounded-full border border-white/10"
+                >
+                  <UserPlus className="h-5 w-5 text-primary" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDemoLogin} className="cursor-pointer">
+                  <Coins className="mr-2 h-4 w-4 text-amber-400" />
+                  <span>Login as Demo User</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setRegisterDialogOpen(true)} className="cursor-pointer">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  <span>Register</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/80 p-0 h-10 px-3 rounded-full border border-primary/20 flex items-center gap-1">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="" />
+                    <AvatarFallback className="bg-primary-foreground text-primary">
+                      <UserCircle className="h-6 w-6" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium ml-1 hidden sm:inline-block">{user.username}</span>
+                  <ChevronDown className="h-4 w-4 text-primary-foreground/70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  <History className="mr-2 h-4 w-4" />
+                  <span>Betting History</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
