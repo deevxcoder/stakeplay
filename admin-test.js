@@ -1,4 +1,5 @@
-import { storage } from './server/storage.ts';
+
+const { storage } = require('./server/storage');
 
 async function testAdminAccess() {
   try {
