@@ -37,6 +37,13 @@ const ensureAdmin = (req: Request, res: Response, next: Function) => {
   res.status(403).json({ message: "Unauthorized: Admin access required" });
 };
 
+// Check admin status endpoint
+app.get("/api/check-admin", ensureAuthenticated, (req, res) => {
+  const user = req.user as User;
+  console.log("User", user.username, "checked admin status. isAdmin:", user.isAdmin);
+  res.json({ isAdmin: user.isAdmin || false });
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
