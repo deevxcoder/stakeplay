@@ -8,7 +8,7 @@ import {
 import { User } from "@shared/schema";
 import { getQueryFn, apiRequest } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom"; // Added useNavigate hook
+import { useLocation } from "wouter";
 
 type UserWithoutPassword = Omit<User, "password">;
 
@@ -39,7 +39,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [, navigate] = useLocation();
 
   const {
     data: user,
