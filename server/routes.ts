@@ -838,36 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users  
   app.get("/api/admin/users", ensureAdmin, async (req, res) => {
     try {
-      const users = [
-        {
-          id: 1,
-          username: "user1",
-          email: "user1@example.com",
-          mobile: "+1234567890",
-          balance: 5000,
-          isAdmin: false,
-          createdAt: new Date(Date.now() - 7 * 86400000).toISOString()
-        },
-        {
-          id: 2,
-          username: "user2",
-          email: "user2@example.com",
-          mobile: "+1987654321",
-          balance: 2500,
-          isAdmin: false,
-          createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
-        },
-        {
-          id: 3,
-          username: "admin",
-          email: "admin@example.com",
-          mobile: "+1555555555",
-          balance: 10000,
-          isAdmin: true,
-          createdAt: new Date(Date.now() - 30 * 86400000).toISOString()
-        }
-      ];
-
+      const users = await db.select().from(users);
       return res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
