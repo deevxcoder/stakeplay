@@ -19,6 +19,7 @@ export interface IStorage {
   updateUser(userId: number, updateData: Partial<User>): Promise<User | undefined>;
   verifyPassword(userId: number, password: string): Promise<boolean>;
   updatePassword(userId: number, newPassword: string): Promise<User | undefined>;
+  makeUserAdmin(username: string): Promise<User | undefined>;
   
   // Bet operations
   createBet(bet: InsertBet): Promise<Bet>;
@@ -150,6 +151,20 @@ export class MemStorage implements IStorage {
     // In a real application, this would hash the password before storing
     const updatedUser = { ...user, password: newPassword };
     this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async makeUserAdmin(username: string): Promise<User | undefined> {
+    const user = await this.getUserByUsername(username);
+    if (!user) return undefined;
+    
+    if (user.isDemo) {
+      // Demo users can never be admin
+      return user;
+    }
+    
+    const updatedUser = { ...user, isAdmin: true };
+    this.users.set(user.id, updatedUser);
     return updatedUser;
   }
 

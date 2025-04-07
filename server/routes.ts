@@ -41,6 +41,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
   
+  // Special route to make a user an admin (for development purposes only)
+  app.post("/api/make-admin", async (req, res) => {
+    try {
+      // Check if we're getting an HTML request from the middleware
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        return res.status(200).json({ error: "This API endpoint can only be accessed programmatically" });
+      }
+      
+      const { username } = req.body;
+      
+      if (!username) {
+        return res.status(400).json({ error: "Username is required" });
+      }
+      
+      // For testing, let's log and hardcode a successful response
+      console.log(`Attempting to make user '${username}' an admin`);
+      
+      const user = await storage.makeUserAdmin(username);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      if (!user.isAdmin) {
+        return res.status(400).json({ error: "Could not make user an admin. Demo users cannot be admins." });
+      }
+      
+      const responseData = { 
+        message: "User is now an admin", 
+        user: {
+          id: user.id,
+          username: user.username,
+          isAdmin: user.isAdmin,
+          balance: user.balance
+        }
+      };
+      
+      console.log('Successful admin creation response:', responseData);
+      return res.status(200).json(responseData);
+    } catch (error) {
+      console.error("Error making user admin:", error);
+      return res.status(500).json({ error: "Failed to make user an admin" });
+    }
+  });
+  
   // Get user's recent bets
   app.get("/api/user/bets", ensureAuthenticated, async (req, res) => {
     const user = req.user as User;
