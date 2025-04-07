@@ -145,8 +145,10 @@ export default function AdminMarketManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/markets"] });
       toast({
-        title: "Market updated",
-        description: "Market information has been updated successfully.",
+        title: marketFormData.id ? "Market Updated" : "Market Created",
+        description: marketFormData.id 
+          ? "Market information has been updated successfully."
+          : "New market has been created successfully.",
       });
       setIsEditMarketOpen(false);
       // Force refresh the markets list

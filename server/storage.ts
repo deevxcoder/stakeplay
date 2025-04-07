@@ -195,9 +195,10 @@ export class MemStorage implements IStorage {
   }
 
   // Market operations
-  private markets: Map<string, Market>;
+  private markets: Map<string, Market> = new Map();
 
   async createMarket(marketData: any): Promise<Market> {
+    console.log("Storage: Creating market with data:", marketData);
     const now = new Date();
     const id = marketData.displayName.toLowerCase().replace(/\s+/g, '-');
     const market = {

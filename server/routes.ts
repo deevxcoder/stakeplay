@@ -871,11 +871,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new market
   app.post("/api/admin/markets", ensureAdmin, async (req, res) => {
     try {
-      console.log("Database URL:", process.env.DATABASE_URL);
+      console.log("Creating new market with data:", req.body);
       const marketData = req.body;
 
       // Save market to database using storage
       const newMarket = await storage.createMarket(marketData);
+      console.log("Market created successfully:", newMarket);
 
       return res.status(201).json(newMarket);
     } catch (error) {
