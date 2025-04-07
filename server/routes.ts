@@ -583,7 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/markets", ensureAdmin, async (req, res) => {
     try {
       const markets = await storage.getAllMarkets();
-      return res.json(markets || [
+      const defaultMarkets = [
         {
           id: "gali",
           name: "Gali Market",
@@ -621,8 +621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           latestResult: "24"
         }
       ];
-
-      return res.json(markets);
+      return res.json(markets || defaultMarkets);
     } catch (error) {
       console.error("Error fetching markets:", error);
       return res.status(500).json({ message: "Internal server error" });
